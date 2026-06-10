@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coin Flip</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d12;
+      --surface:   #16161f;
+      --border:    #2a2a38;
+      --gold-light: #f9d96b;
+      --gold-mid:   #c89c2a;
+      --gold-dark:  #7a5c10;
+      --silver-light: #e8eaf0;
+      --silver-mid:   #a0a8b8;
+      --silver-dark:  #4a5068;
+      --accent:    #7c6bff;
+      --accent2:   #ff6b9d;
+      --text:      #e8e8f0;
+      --muted:     #6a6a88;
+      --heads-glow: rgba(249,217,107,0.35);
+      --tails-glow: rgba(160,168,184,0.35);
+      --radius:    16px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px 60px;
+      overflow-x: hidden;
+    }
+
+    /* ── Starfield ── */
+    #stars {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--dur) ease-in-out infinite var(--delay);
+      opacity: 0.4;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50%       { opacity: 0.8;  transform: scale(1.4); }
+    }
+
+    /* ── Layout ── */
+    .wrapper {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 620px;
+      display: flex; flex-direction: column; align-items: center; gap: 32px;
+    }
+
+    /* ── Header ── */
+    header { text-align: center; }
+    header h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+    header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── Coin Stage ── */
+    .coin-stage {
+      perspective: 800px;
+      width: 200px; height: 200px;
+    }
+    .coin {
+      width: 200px; height: 200px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.05s;
+      cursor: pointer;
+      filter: drop-shadow(0 8px 32px rgba(0,0,0,0.6));
+    }
+    .coin-face {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+      user-select: none;
+    }
+    .coin-heads {
+      background: radial-gradient(circle at 35% 35%, var(--gold-light), var(--gold-mid) 55%, var(--gold-dark));
+      box-shadow: inset -6px -6px 18px rgba(0,0,0,0.4), inset 4px 4px 12px rgba(255,255,255,0.25);
+    }
+    .coin-tails {
+      background: radial-gradient(circle at 35% 35%, var(--silver-light), var(--silver-mid) 55%, var(--silver-dark));
+      box-shadow: inset -6px -6px 18px rgba(0,0,0,0.4), inset 4px 4px 12px rgba(255,255,255,0.3);
+      transform: rotateY(180deg);
+    }
+    .coin-edge {
+      position: absolute; inset: 0; border-radius: 50%;
+      pointer-events: none;
+      border: 6px solid transparent;
+    }
+    .coin.heads .coin-edge { border-color: var(--gold-mid); }
+    .coin.tails .coin-edge { border-color: var(--silver-mid); }
+
+    /* Spin animation */
+    @keyframes coinSpin {
+      0%   { transform: rotateY(0deg); }
+      100% { transform: rotateY(3600deg); }
+    }
+    .coin.spinning {
+      animation: coinSpin 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+    .coin.land-heads {
+      transform: rotateY(0deg);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .coin.land-tails {
+      transform: rotateY(180deg);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Glow ring around stage */
+    .coin-stage::after {
+      content: '';
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.5s;
+      pointer-events: none;
+    }
+    .coin-stage.glow-heads::after {
+      background: radial-gradient(circle, var(--heads-glow) 0%, transparent 70%);
+      opacity: 1;
+    }
+    .coin-stage.glow-tails::after {
+      background: radial-gradient(circle, var(--tails-glow) 0%, transparent 70%);
+      opacity: 1;
+    }
+
+    /* ── Result Banner ── */
+    .result-banner {
+      height: 48px; display: flex; align-items: center; justify-content: center;
+    }
+    .result-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(10px) scale(0.9);
+      transition: opacity 0.35s, transform 0.35s;
+    }
+    .result-text.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .result-text.heads { color: var(--gold-light); text-shadow: 0 0 20px var(--heads-glow); }
+    .result-text.tails { color: var(--silver-light); text-shadow: 0 0 20px var(--tails-glow); }
+
+    /* ── Flip Button ── */
+    .flip-btn {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 18px 52px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+      box-shadow: 0 6px 28px rgba(124,107,255,0.45);
+      position: relative;
+      overflow: hidden;
+    }
+    .flip-btn::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.12);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .flip-btn:hover:not(:disabled)::after { opacity: 1; }
+    .flip-btn:active:not(:disabled) { transform: scale(0.96); }
+    .flip-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Counters ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      width: 100%;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 12px;
+      text-align: center;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .stat-card.highlight-heads {
+      border-color: var(--gold-mid);
+      box-shadow: 0 0 16px rgba(249,217,107,0.15);
+    }
+    .stat-card.highlight-tails {
+      border-color: var(--silver-mid);
+      box-shadow: 0 0 16px rgba(160,168,184,0.15);
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      transition: transform 0.2s;
+    }
+    .stat-value.pop { animation: popVal 0.25s ease; }
+    @keyframes popVal {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.35); }
+      100% { transform: scale(1); }
+    }
+    .stat-card:nth-child(1) .stat-value { color: var(--gold-light); }
+    .stat-card:nth-child(2) .stat-value { color: var(--silver-light); }
+    .stat-card:nth-child(3) .stat-value { color: var(--accent); }
+
+    /* ── Streak / Win Rate ── */
+    .info-row {
+      display: flex; gap: 14px; width: 100%;
+    }
+    .info-card {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .info-card .label {
+      font-size: 0.7rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .info-card .value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ── Progress Bar ── */
+    .bar-section { width: 100%; }
+    .bar-labels {
+      display: flex; justify-content: space-between;
+      font-size: 0.72rem; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .bar-track {
+      height: 10px; border-radius: 99px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden; position: relative;
+    }
+    .bar-fill-heads {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold-light));
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    /* ── History ── */
+    .history-section { width: 100%; }
+    .history-title {
+      font-size: 0.72rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .history-pills {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .pill {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      animation: pillIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .pill.heads {
+      background: radial-gradient(circle at 35% 35%, var(--gold-light), var(--gold-dark));
+      box-shadow: 0 2px 8px rgba(249,217,107,0.3);
+    }
+    .pill.tails {
+      background: radial-gradient(circle at 35% 35%, var(--silver-light), var(--silver-dark));
+      box-shadow: 0 2px 8px rgba(160,168,184,0.2);
+    }
+    @keyframes pillIn {
+      from { opacity:0; transform: scale(0.4) rotate(-30deg); }
+      to   { opacity:1; transform: scale(1) rotate(0deg); }
+    }
+    .history-empty {
+      color: var(--muted); font-size: 0.82rem; font-style: italic;
+    }
+
+    /* ── Reset Button ── */
+    .reset-btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 10px 28px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .reset-btn:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ── Sound Toggle ── */
+    .sound-toggle {
+      position: fixed; top: 18px; right: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 42px; height: 42px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+      z-index: 10;
+    }
+    .sound-toggle:hover { border-color: var(--accent); background: #1f1f2e; }
+
+    /* ── Confetti canvas ── */
+    #confetti-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 50;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 420px) {
+      .coin-stage, .coin { width: 160px; height: 160px; }
+      .coin-face { font-size: 4rem; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .coin.spinning { animation: none; }
+      .pill { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Starfield -->
+<div id="stars"></div>
+
+<!-- Confetti -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- Sound Toggle -->
+<button class="sound-toggle" id="soundBtn" title="Toggle sound">🔊</button>
+
+<div class="wrapper">
+
+  <header>
+    <h1>Coin Flip</h1>
+    <p>Heads or tails — fate decides</p>
+  </header>
+
+  <!-- Coin -->
+  <div class="coin-stage" id="coinStage">
+    <div class="coin heads" id="coin">
+      <div class="coin-face coin-heads">👑</div>
+      <div class="coin-face coin-tails">🦅</div>
+      <div class="coin-edge"></div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-banner">
+    <div class="result-text" id="resultText">—</div>
+  </div>
+
+  <!-- Flip Button -->
+  <button class="flip-btn" id="flipBtn">Flip the Coin</button>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card" id="cardHeads">
+      <div class="stat-label">Heads 👑</div>
+      <div class="stat-value" id="headsCount">0</div>
+    </div>
+    <div class="stat-card" id="cardTails">
+      <div class="stat-label">Tails 🦅</div>
+      <div class="stat-value" id="tailsCount">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total</div>
+      <div class="stat-value" id="totalCount">0</div>
+    </div>
+  </div>
+
+  <!-- Info Row -->
+  <div class="info-row">
+    <div class="info-card">
+      <div class="label">Win Rate (H)</div>
+      <div class="value" id="headsRate">—</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Current Streak</div>
+      <div class="value" id="streakVal">—</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Longest Streak</div>
+      <div class="value" id="longestStreak">—</div>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="bar-section">
+    <div class="bar-labels">
+      <span>👑 Heads</span>
+      <span>Tails 🦅</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-fill-heads" id="barFill" style="width:50%"></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="history-section">
+    <div class="history-title">Last 30 flips</div>
+    <div class="history-pills" id="historyPills">
+      <span class="history-empty">No flips yet</span>
+    </div>
+  </div>
+
+  <!-- Reset -->
+  <button class="reset-btn" id="resetBtn">Reset Stats</button>
+
+</div>
+
+<script>
+  /* ───────────────────────────────────────────
+     STATE
+  ─────────────────────────────────────────── */
+  let state = load() || {
+    heads: 0, tails: 0, total: 0,
+    history: [],          // 'heads'|'tails'
+    currentStreak: 0,
+    currentStreakType: null,
+    longestStreak: 0,
+  };
+  let isFlipping = false;
+  let soundOn = true;
+
+  /* ───────────────────────────────────────────
+     AUDIO  (Web Audio API — no files needed)
+  ─────────────────────────────────────────── */
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let ctx;
+  function getCtx() {
+    if (!ctx) ctx = new AudioCtx();
+    return ctx;
+  }
+
+  function playWhoosh() {
+    if (!soundOn) return;
+    const ac = getCtx();
+    const buf = ac.createBuffer(1, ac.sampleRate * 0.5, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
+    }
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const filt = ac.createBiquadFilter();
+    filt.type = 'bandpass'; filt.frequency.value = 800; filt.Q.value = 0.5;
+    filt.frequency.linearRampToValueAtTime(200, ac.currentTime + 0.5);
+    const gain = ac.createGain();
+    gain.gain.setValueAtTime(0.25, ac.currentTime);
+    gain.gain.linearRampToValueAtTime(0, ac.currentTime + 0.5);
+    src.connect(filt); filt.connect(gain); gain.connect(ac.destination);
+    src.start(); src.stop(ac.currentTime + 0.5);
+  }
+
+  function playLand(isHeads) {
+    if (!soundOn) return;
+    const ac = getCtx();
+    // metallic "clink"
+    [0, 0.03, 0.06].forEach((offset, i) => {
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      const freq = isHeads ? 1200 - i * 120 : 900 - i * 90;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ac.currentTime + offset);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.5, ac.currentTime + offset + 0.18);
+      gain.gain.setValueAtTime(0.18, ac.currentTime + offset);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + offset + 0.3);
+      osc.connect(gain); gain.connect(ac.destination);
+      osc.start(ac.currentTime + offset);
+      osc.stop(ac.currentTime + offset + 0.35);
+    });
+  }
+
+  /* ───────────────────────────────────────────
+     CONFETTI
+  ─────────────────────────────────────────── */
+  const canvas = document.getElementById('confetti-canvas');
+  const cctx = canvas.getContext('2d');
+  let confettiPieces = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function launchConfetti(isHeads) {
+    const colors = isHeads
+      ? ['#f9d96b','#c89c2a','#fff4a3','#ffeaa0','#b8860b']
+      : ['#e8eaf0','#a0a8b8','#ffffff','#c8ccd8','#6a7490'];
+    for (let i = 0; i < 80; i++) {
+      confettiPieces.push({
+        x: Math.random() * canvas.width,
+        y: -10,
+        w: Math.random() * 10 + 4,
+        h: Math.random() * 5 + 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 5,
+        vy: Math.random() * 4 + 2,
+        angle: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.2,
+        life: 1,
+      });
+    }
+  }
+
+  function animateConfetti() {
+    cctx.clearRect(0, 0, canvas.width, canvas.height);
+    confettiPieces = confettiPieces.filter(p => p.life > 0);
+    confettiPieces.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      p.angle += p.spin;
+      p.vy += 0.08;
+      if (p.y > canvas.height) p.life = 0;
+      p.life -= 0.008;
+      cctx.save();
+      cctx.globalAlpha = Math.max(0, p.life);
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.angle);
+      cctx.fillStyle = p.color;
+      cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      cctx.restore();
+    });
+    if (confettiPieces.length > 0) requestAnimationFrame(animateConfetti);
+  }
+
+  /* ───────────────────────────────────────────
+     FLIP LOGIC
+  ─────────────────────────────────────────── */
+  const coin      = document.getElementById('coin');
+  const coinStage = document.getElementById('coinStage');
+  const flipBtn   = document.getElementById('flipBtn');
+  const resultEl  = document.getElementById('resultText');
+
+  function flip() {
+    if (isFlipping) return;
+    isFlipping = true;
+    flipBtn.disabled = true;
+
+    // Reset UI
+    resultEl.classList.remove('visible','heads','tails');
+    coinStage.classList.remove('glow-heads','glow-tails');
+
+    // Determine outcome
+    const isHeads = Math.random() < 0.5;
+
+    // Sound: whoosh during spin
+    playWhoosh();
+
+    // Remove previous land classes
+    coin.classList.remove('land-heads','land-tails','spinning','heads','tails');
+
+    // Force reflow then spin
+    void coin.offsetWidth;
+    coin.classList.add('spinning');
+
+    const SPIN_DURATION = 1400;
+
+    setTimeout(() => {
+      coin.classList.remove('spinning');
+      void coin.offsetWidth;
+      coin.classList.add(isHeads ? 'land-heads' : 'land-tails');
+      coin.classList.add(isHeads ? 'heads' : 'tails');
+
+      playLand(isHeads);
+
+      // Glow
+      coinStage.classList.add(isHeads ? 'glow-heads' : 'glow-tails');
+
+      // Result text
+      resultEl.textContent = isHeads ? 'HEADS' : 'TAILS';
+      resultEl.className = 'result-text ' + (isHeads ? 'heads' : 'tails');
+      setTimeout(() => resultEl.classList.add('visible'), 20);
+
+      // Update state
+      updateState(isHeads);
+
+      // Confetti
+      launchConfetti(isHeads);
+      animateConfetti();
+
+      isFlipping = false;
+      flipBtn.disabled = false;
+    }, SPIN_DURATION);
+  }
+
+  function updateState(isHeads) {
+    const type = isHeads ? 'heads' : 'tails';
+    state.total++;
+    state[type]++;
+    state.history.unshift(type);
+    if (state.history.length > 30) state.history.pop();
+
+    // Streak
+    if (state.currentStreakType === type) {
+      state.currentStreak++;
+    } else {
+      state.currentStreakType = type;
+      state.currentStreak = 1;
+    }
+    if (state.currentStreak > state.longestStreak) {
+      state.longestStreak = state.currentStreak;
+    }
+
+    save();
+    renderUI(type);
+  }
+
+  /* ───────────────────────────────────────────
+     RENDER UI
+  ─────────────────────────────────────────── */
+  function renderUI(lastType) {
+    const { heads, tails, total, history, currentStreak, currentStreakType, longestStreak } = state;
+
+    setCounterPop('headsCount', heads, lastType === 'heads');
+    setCounterPop('tailsCount', tails, lastType === 'tails');
+    setCounterPop('totalCount', total, true);
+
+    document.getElementById('headsRate').textContent =
+      total > 0 ? (heads / total * 100).toFixed(1) + '%' : '—';
+
+    const streakIcon = currentStreakType === 'heads' ? '👑' : currentStreakType === 'tails' ? '🦅' : '';
+    document.getElementById('streakVal').textContent =
+      total > 0 ? `${currentStreak}× ${streakIcon}` : '—';
+    document.getElementById('longestStreak').textContent =
+      longestStreak > 0 ? `${longestStreak}×` : '—';
+
+    // Bar
+    const pct = total > 0 ? (heads / total * 100) : 50;
+    document.getElementById('barFill').style.width = pct + '%';
+
+    // Card highlights
+    const cardH = document.getElementById('cardHeads');
+    const cardT = document.getElementById('cardTails');
+    cardH.classList.toggle('highlight-heads', lastType === 'heads');
+    cardT.classList.toggle('highlight-tails', lastType === 'tails');
+
+    // History pills
+    const pCon = document.getElementById('historyPills');
+    pCon.innerHTML = '';
+    if (history.length === 0) {
+      pCon.innerHTML = '<span class="history-empty">No flips yet</span>';
+      return;
+    }
+    history.forEach(h => {
+      const p = document.createElement('div');
+      p.className = 'pill ' + h;
+      p.textContent = h === 'heads' ? '👑' : '🦅';
+      p.title = h.charAt(0).toUpperCase() + h.slice(1);
+      pCon.appendChild(p);
+    });
+  }
+
+  function setCounterPop(id, val, doPop) {
+    const el = document.getElementById(id);
+    el.textContent = val;
+    if (doPop) {
+      el.classList.remove('pop');
+      void el.offsetWidth;
+      el.classList.add('pop');
+    }
+  }
+
+  /* ───────────────────────────────────────────
+     RESET
+  ─────────────────────────────────────────── */
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (!confirm('Reset all stats?')) return;
+    state = { heads:0, tails:0, total:0, history:[], currentStreak:0, currentStreakType:null, longestStreak:0 };
+    save();
+    coin.classList.remove('spinning','land-heads','land-tails','tails');
+    coin.classList.add('heads');
+    coinStage.classList.remove('glow-heads','glow-tails');
+    resultEl.classList.remove('visible','heads','tails');
+    resultEl.textContent = '—';
+    document.getElementById('barFill').style.width = '50%';
+    renderUI(null);
+  });
+
+  /* ───────────────────────────────────────────
+     SOUND TOGGLE
+  ─────────────────────────────────────────── */
+  const soundBtn = document.getElementById('soundBtn');
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    soundBtn.textContent = soundOn ? '🔊' : '🔇';
+  });
+
+  /* ───────────────────────────────────────────
+     STARFIELD
+  ─────────────────────────────────────────── */
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 1;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%;
+      left:${Math.random()*100}%;
+      --dur:${(Math.random()*3+2).toFixed(1)}s;
+      --delay:-${(Math.random()*5).toFixed(1)}s;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  /* ───────────────────────────────────────────
+     PERSISTENCE
+  ─────────────────────────────────────────── */
+  function save() {
+    try { localStorage.setItem('coinflip_state', JSON.stringify(state)); } catch(e) {}
+  }
+  function load() {
+    try { return JSON.parse(localStorage.getItem('coinflip_state')); } catch(e) { return null; }
+  }
+
+  /* ───────────────────────────────────────────
+     KEYBOARD SHORTCUT  (Space / Enter)
+  ─────────────────────────────────────────── */
+  document.addEventListener('keydown', e => {
+    if ((e.code === 'Space' || e.code === 'Enter') && !isFlipping) {
+      e.preventDefault();
+      flip();
+    }
+  });
+
+  /* ───────────────────────────────────────────
+     INIT
+  ─────────────────────────────────────────── */
+  flipBtn.addEventListener('click', flip);
+  renderUI(null);   // populate counters from saved state on load
+</script>
+</body>
+</html>

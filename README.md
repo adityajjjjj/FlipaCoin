@@ -1,16 +1,20 @@
 # 🪙 FlipaCoin
+> *it's giving skill. it's not.*
 
-> flipping a big fat coin
+A single-file coin flip survival game with TikTok live energy, a fake skill system, dummy authentication, and enough psychological manipulation to keep you playing for way too long.
 
-A zero-dependency, single-file coin flip web app with animations, sound, stats tracking, and persistent history.
+No frameworks. No build step. No dependencies. Just open `index.html` in a browser.
 
 ---
 
 ## 🚀 How to Run
 
-No installs. No build step. No server required.
+**Option 1 — Double-click** `index.html` in Finder/File Explorer. Opens in any browser instantly.
 
-Just open `index.html` in any browser — double-click it in Finder/File Explorer, or use VS Code's Live Server extension for auto-reload while editing.
+**Option 2 — VS Code Live Server** (best for editing):
+1. Install the **Live Server** extension in VS Code
+2. Right-click `index.html` → **Open with Live Server**
+3. Auto-reloads on every save
 
 ---
 
@@ -18,194 +22,166 @@ Just open `index.html` in any browser — double-click it in Finder/File Explore
 
 ```
 FlipaCoin/
-├── index.html   ← the entire app (HTML + CSS + JS in one file)
+├── index.html   ← the entire app (HTML + CSS + JS, ~1100 lines)
 └── README.md
 ```
 
-Everything lives inside `index.html`. There are no external files, no npm packages, no frameworks.
+Everything is in one file. No `node_modules`, no bundler, no build command.
 
 ---
 
-## 🏗️ Architecture Overview
+## 🎮 How to Play
 
-The file is split into three sections inside one HTML document:
+1. **Sign up or log in** on the auth screen
+2. **Pick Heads or Tails** before every flip (or use `H` / `T` on keyboard)
+3. **Flip the coin** — button or `Space`
+4. ✅ Correct = streak goes up, you keep going
+5. ❌ Wrong = **instant game over**, no second chances
+6. 💰 **Cash Out** at streak 3+ to bank your score safely and restart clean
+7. 🌡️ **Watch the Heat Meter** — it's a "hint" (it's fake, but your brain won't care)
+
+---
+
+## ✨ Features
+
+### 🔐 Authentication
+- **Sign Up** — username (3+ chars, alphanumeric + underscores), email, password (6+ chars), confirm password
+- **Log In** — validates against localStorage "database", inline error messages with red input highlighting
+- **Social login** — Google, Discord, X/Twitter buttons fake a 1.2s connection delay then auto-create a guest account
+- **Persistent session** — saved to `localStorage`, survives page refresh (no re-login needed)
+- **@username chip** in the top bar — click to log out
+- **Welcome toast** on login — personalized "welcome back" vs "welcome to the coin"
+
+### 🪙 Core Game Loop
+- One life. Pick correctly = streak up. Wrong = GAME OVER. No mercy.
+- Coin spins faster every 5 correct guesses (spin duration shrinks from 1.1s down to 0.45s minimum)
+- **DANGER ZONE** kicks in at streak 5 — flashing warning, bass thump, coin wobbles
+- **💰 Cash Out** button appears at streak 3 — save your streak and restart, or risk it all
+- **Near miss** — 15% of losing flips show a red glow on the coin right before it lands wrong, making it feel like you *almost* made it
+
+### 🧠 The Skill Illusion (why it's addictive)
+- **Heat Meter** — shows which side is "hot." Updates after every flip biased toward the *opposite* of the last result (gambler's fallacy bait). Feels like real information. Isn't.
+- **Coin Lean** — coin physically tilts before you flip, suggesting a "tell." Loosely correlated with the heat meter, mostly random. Players think they found a pattern.
+- **Streak Multiplier badge** — your streak IS the multiplier number. Going from 5× to 6× triggers a reward loop.
+- **Near miss psychology** — losing by "almost" surviving pulls you back in faster than a clean loss
+
+### 💬 Live TikTok Chat (fake)
+30 fake accounts (`@skill_issue_lol`, `@ratio_machine`, `@delulu_but_right`, `@chronically_online__`, etc.) spam the right sidebar throughout gameplay. Messages fire from 3 pools:
+- **Hype** — "LETS GOOOOO 🔥", "ate and LEFT no crumbs 💅", "bro can predict the future??"
+- **Roast** — "cooked. deleted. blocked.", "npc behavior detected", "this is painful to witness"
+- **Neutral** — "the heat meter is RIGHT THERE 👀", "i'm nervous for them", "don't mess this up"
+
+Chat reacts contextually — milestones trigger hype waves, game over triggers roast waves, cash out triggers its own comments.
+
+### 😈 Taunts & Roasts
+- **Win taunts** — "W rizz on a coin fr", "the universe said yes king", "heat meter never lies 🔥"
+- **Lose taunts** — "L + ratio + wrong + skill issue", "should've cashed out bestie 😭", "ratio'd by a literal coin"
+- **Game over roasts** — tuned to your exact score. Dying at 1 = "bro lasted one flip 💀 delete the app". Dying at 50 = "50 STREAK AND YOU STILL LOST??"
+- **Milestone callouts** — special messages at 5, 10, 15, 20, 25, 30, 40, 50 correct
+
+### 🎨 Visual Effects
+- **Animated starfield** — 80 twinkling stars fixed behind everything
+- **Background pulse** — subtle color shifts gold/silver based on coin result
+- **Confetti burst** — gold palette on win, red on loss, fires on correct guess and cashout
+- **Floating emoji reactions** — 🔥💯👑 on wins, 💀😭🪦 on losses, spawn from random positions
+- **Screen shake** — wrong guess shakes the whole page
+- **Screen flash** — green tint on correct, red on wrong
+- **Glow rings** — gold or silver halo around the coin after landing
+- **Level-up style toast** — appears on milestone streaks
+
+### 🔊 Sound (Web Audio API — no files needed)
+All sound generated in-browser, no audio files:
+
+| Sound | When |
+|---|---|
+| Whoosh | During coin spin |
+| Metallic clink (3 oscillators) | On landing |
+| Victory chime (ascending 3 notes) | Correct guess |
+| Descending sawtooth buzz | Wrong guess / game over |
+| 5-note fanfare | Milestone streaks |
+| 4-note ascending chord | Cash out |
+| Low bass thump | Danger zone flip |
+
+### 📊 Stats Tracking
+- Current streak + session best
+- All-time best (persisted in `localStorage` forever)
+- Total flips + accuracy % (shown on game over screen)
+- Whether you cashed out this run and at what streak
+
+---
+
+## 🏗️ Architecture
+
+The file has three sections inside one HTML document:
 
 ```
 index.html
-├── <head>         → fonts + all CSS styles
-├── <body>         → HTML structure (the UI)
-└── <script>       → all JavaScript logic
+├── <head>          → Google Fonts import + all CSS (~310 lines)
+├── <body>          → HTML structure for all screens
+└── <script>        → all JavaScript logic (~600 lines)
 ```
 
----
-
-## 🎨 CSS — How It's Styled
-
-### Design Tokens (CSS Variables)
-At the top of the `<style>` block, a `:root` block defines every color used in the app:
-
-```css
-:root {
-  --bg:           #0d0d12;      /* near-black page background */
-  --surface:      #16161f;      /* card backgrounds */
-  --gold-light:   #f9d96b;      /* heads color (bright) */
-  --gold-mid:     #c89c2a;      /* heads color (mid) */
-  --gold-dark:    #7a5c10;      /* heads color (dark) */
-  --silver-light: #e8eaf0;      /* tails color (bright) */
-  --silver-mid:   #a0a8b8;      /* tails color (mid) */
-  --silver-dark:  #4a5068;      /* tails color (dark) */
-  --accent:       #7c6bff;      /* purple — button, total counter */
-  --accent2:      #ff6b9d;      /* pink — button gradient end */
-}
+### Screens (all `position:fixed`, toggled via `.show` class)
+```
+Auth Screen          → login/signup, gates everything
+  ↓ (on login)
+Start Screen         → rules + "i'm built different" button
+  ↓ (on start)
+Game (live)          → coin, picks, heat meter, chat, cashout
+  ↓ (on wrong guess)
+Game Over Screen     → score, roast, stats, replay
+  ↓ (on cashout)
+Cashout Screen       → celebration, saved streak, run it back
 ```
 
-This makes it easy to retheme the whole app by changing just these values.
+### Key JS Functions
 
-### Fonts
-Two fonts are imported from Google Fonts:
-- **Space Grotesk** — used for all body text, labels, and buttons
-- **Space Mono** — monospace font used for numbers and the result banner (HEADS / TAILS)
-
-### Key CSS Sections
-
-| Section | What it does |
+| Function | What it does |
 |---|---|
-| `#stars` / `.star` | Positions 80 tiny dots fixed behind everything, animated with `@keyframes twinkle` |
-| `.coin-stage` | A `perspective: 800px` container that creates the 3D depth effect |
-| `.coin` | The flippable element using `transform-style: preserve-3d` |
-| `.coin-face` | Each face (heads/tails) uses `backface-visibility: hidden` so only one shows at a time |
-| `@keyframes coinSpin` | Rotates the coin 3600° (10 full rotations) over 1.4 seconds |
-| `.coin.land-heads/tails` | Snaps the coin to the final position with a springy `cubic-bezier` bounce |
-| `.coin-stage::after` | An invisible overlay that becomes a gold or silver glow ring after landing |
-| `.stat-value.pop` | A quick scale-up animation that plays on the counter that just changed |
-| `.pill` | The small circular history icons, each animated in with a spin-scale entrance |
+| `checkSession()` | Runs on load — auto-logs in if valid session in localStorage |
+| `doLogin()` | Validates inputs, checks against localStorage "DB", calls `loginSuccess()` |
+| `doSignup()` | Validates all fields, hashes password with `btoa()`, saves to localStorage |
+| `dummySocial()` | Fakes OAuth delay, auto-creates guest account, calls `loginSuccess()` |
+| `loginSuccess()` | Saves session, shows welcome toast, reveals start screen |
+| `doLogout()` | Clears session, resets game state, shows auth screen |
+| `pick(side)` | Sets prediction, updates button styles, triggers coin lean |
+| `doFlip()` | Main game loop — spin animation, outcome, sound, scoring, near miss |
+| `updateHeat(result)` | Updates fake heat meter with gambler's-fallacy-biased drift |
+| `showLean(side)` | Tilts coin pre-flip as a fake "tell" |
+| `doCashout()` | Banks streak, shows cashout screen, resets for next run |
+| `showGameOver()` | Shows score, picks roast based on streak, displays stats |
+| `restartGame()` | Full state reset, back to live game |
+| `addChat(msg, type)` | Injects a fake chat message into the sidebar |
+| `burst(win)` | Launches confetti particles (gold=win, red=loss) |
+| `floatEmoji(e, x, y)` | Spawns a floating emoji that drifts upward and fades |
 
----
-
-## 🧱 HTML Structure
-
-The visible UI is built inside a `.wrapper` div, stacked vertically:
-
-```
-<body>
-├── #stars                  ← animated starfield (fixed, behind everything)
-├── #confetti-canvas        ← fullscreen canvas for confetti particles
-├── .sound-toggle           ← 🔊 button fixed to top-right corner
-└── .wrapper                ← centered column, max-width 620px
-    ├── <header>            ← title + subtitle
-    ├── .coin-stage         ← 3D coin container
-    │   └── .coin           ← the coin itself
-    │       ├── .coin-heads ← front face (gold, 👑)
-    │       ├── .coin-tails ← back face (silver, 🦅), pre-rotated 180°
-    │       └── .coin-edge  ← border ring that changes color on result
-    ├── .result-banner      ← "HEADS" or "TAILS" text, fades in after flip
-    ├── .flip-btn           ← the main button
-    ├── .stats-grid         ← 3-column grid: Heads count, Tails count, Total
-    ├── .info-row           ← Win Rate % | Current Streak | Longest Streak
-    ├── .bar-section        ← heads vs tails ratio progress bar
-    ├── .history-section    ← last 30 flips shown as mini coin pills
-    └── .reset-btn          ← clears all stats (with confirmation)
-```
-
----
-
-## ⚙️ JavaScript — How the Logic Works
-
-### State Object
-All data lives in one plain object:
-
+### Auth "Database"
+Stored in `localStorage` as two keys:
 ```js
-state = {
-  heads: 0,               // total heads count
-  tails: 0,               // total tails count
-  total: 0,               // total flips
-  history: [],            // array of 'heads'/'tails', newest first, max 30
-  currentStreak: 0,       // how many in a row right now
-  currentStreakType: null, // 'heads' or 'tails'
-  longestStreak: 0,       // all-time record streak
+// fca_users — object of all accounts
+{
+  "adityajjjj": { password: "base64encoded", email: "a@b.com", joined: 1234567890 },
+  "google_user_4821": { password: "base64encoded", email: "", social: "Google" }
 }
+
+// fca_session — just the username string of whoever's logged in
+"adityajjjj"
 ```
-
-This state is saved to `localStorage` after every flip, so it survives page refreshes.
-
-### Core Functions
-
-#### `flip()`
-The main function. Called when the button is clicked, or Space/Enter is pressed.
-
-1. Sets `isFlipping = true` and disables the button (prevents double-flips)
-2. Calls `Math.random() < 0.5` to determine heads or tails
-3. Plays the whoosh sound via `playWhoosh()`
-4. Adds `.spinning` class to the coin → triggers the CSS spin animation
-5. After 1400ms (when the spin ends), removes `.spinning` and adds `.land-heads` or `.land-tails`
-6. Plays the landing clink sound via `playLand()`
-7. Shows the result text and glow ring
-8. Calls `updateState()` and `launchConfetti()`
-9. Re-enables the button
-
-#### `updateState(isHeads)`
-Updates the state object after a flip:
-- Increments the right counter and total
-- Prepends the result to `history[]`, trims it to 30
-- Updates current streak (resets to 1 if the type changed)
-- Updates longest streak if current beats it
-- Calls `save()` to write to localStorage
-- Calls `renderUI()` to update the DOM
-
-#### `renderUI(lastType)`
-Reads from `state` and updates every visible element:
-- Updates the three counter numbers (with a pop animation on the one that changed)
-- Updates win rate %, streak display, longest streak
-- Animates the progress bar width
-- Highlights the winning stat card with a colored border
-- Rebuilds the history pills row from scratch
-
-#### Sound — Web Audio API
-No audio files are used. All sound is generated programmatically:
-
-- **`playWhoosh()`** — creates a buffer of white noise, runs it through a bandpass filter that sweeps from 800Hz down to 200Hz, fades out over 0.5s. Sounds like a spinning whoosh.
-- **`playLand(isHeads)`** — fires 3 sine wave oscillators in quick succession (offset by 30ms each), at slightly different frequencies depending on heads (higher pitch) or tails (lower pitch). Together they sound like a metallic clink.
-
-The `AudioContext` is only created on first use (after a user interaction), which is required by browsers.
-
-#### Confetti — Canvas API
-A `<canvas>` element sits fixed over the full page at z-index 50.
-
-- **`launchConfetti(isHeads)`** — pushes 80 particle objects into an array. Each has a random position, velocity, rotation, size, and color (gold palette for heads, silver for tails).
-- **`animateConfetti()`** — runs a `requestAnimationFrame` loop. Each frame it clears the canvas, updates every particle's position/rotation/opacity, draws it as a rotated rectangle, and removes dead particles. Stops looping when the array is empty.
-
-#### Starfield
-On page load, 80 `<div class="star">` elements are created and injected into `#stars`. Each gets a random size (1–3px), random position, and random CSS custom property values (`--dur`, `--delay`) that control its individual twinkle animation timing.
-
-#### Persistence
-```js
-function save() {
-  localStorage.setItem('coinflip_state', JSON.stringify(state));
-}
-function load() {
-  return JSON.parse(localStorage.getItem('coinflip_state'));
-}
-```
-Called on every flip. On page load, `load()` runs first — if saved data exists, it restores the state and `renderUI()` populates the counters immediately.
+Passwords are encoded with `btoa()` — not real security, just enough to look right. This is a frontend-only dummy system.
 
 ---
 
 ## ⌨️ Controls
 
-| Action | How |
+| Key | Action |
 |---|---|
-| Flip the coin | Click the **Flip the Coin** button |
-| Flip with keyboard | Press `Space` or `Enter` |
-| Toggle sound | Click the 🔊 button (top-right) |
-| Reset all stats | Click **Reset Stats** → confirm |
+| `H` | Pick Heads |
+| `T` | Pick Tails |
+| `Space` | Flip the coin |
+| `C` | Cash out (if available) |
 
 ---
 
 ## 🌐 Browser Compatibility
 
-Works in all modern browsers (Chrome, Firefox, Safari, Edge). No polyfills needed.
-
-- CSS 3D transforms — supported everywhere
-- Web Audio API — supported everywhere (requires a user interaction before first sound)
-- Canvas API — supported everywhere
-- localStorage — supported everywhere
+Works in all modern browsers. Requires a user interaction before audio plays (browser rule, not a bug). No polyfills needed.

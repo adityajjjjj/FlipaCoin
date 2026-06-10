@@ -1,1105 +1,918 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>FlipaCoin</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlipaCoin 🪙</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;700;800&family=Space+Mono:wght@700&display=swap');
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
-    :root {
-      --bg: #08080f;
-      --surface: #12121c;
-      --surface2: #1a1a28;
-      --border: #252538;
-      --text: #e8e8f4;
-      --muted: #5a5a7a;
-      --radius: 18px;
+:root{
+  --bg:#0a0a0f;
+  --surface:#141420;
+  --border:#252540;
+  --text:#f0f0ff;
+  --muted:#55557a;
+  --gold:#f9d96b;
+  --gold2:#c89c2a;
+  --silver:#dde2f0;
+  --silver2:#8090b0;
+  --accent:#7c6bff;
+  --pink:#ff4da6;
+  --green:#00ff88;
+  --red:#ff3355;
+  --orange:#ff8c00;
+}
 
-      /* skin: classic (default) */
-      --coin-h1: #f9d96b; --coin-h2: #c89c2a; --coin-h3: #7a5c10;
-      --coin-t1: #e8eaf0; --coin-t2: #a0a8b8; --coin-t3: #4a5068;
-      --coin-glow-h: rgba(249,217,107,0.4);
-      --coin-glow-t: rgba(160,168,184,0.4);
+html,body{height:100%;overflow:hidden;}
 
-      --accent: #7c6bff;
-      --accent2: #ff6b9d;
-      --green: #4ade80;
-      --red: #f87171;
-      --orange: #fb923c;
-    }
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+}
 
-    /* ── SKINS ── */
-    body.skin-neon {
-      --coin-h1: #00ffcc; --coin-h2: #00c4a0; --coin-h3: #007a60;
-      --coin-t1: #ff00ff; --coin-t2: #c400c4; --coin-t3: #7a007a;
-      --coin-glow-h: rgba(0,255,204,0.45); --coin-glow-t: rgba(255,0,255,0.45);
-    }
-    body.skin-fire {
-      --coin-h1: #ffdd57; --coin-h2: #ff6b00; --coin-h3: #8b1a00;
-      --coin-t1: #ff4444; --coin-t2: #cc0000; --coin-t3: #660000;
-      --coin-glow-h: rgba(255,107,0,0.5); --coin-glow-t: rgba(255,68,68,0.45);
-    }
-    body.skin-ice {
-      --coin-h1: #e0f7ff; --coin-h2: #72d4f7; --coin-h3: #1a7fa0;
-      --coin-t1: #c8e8ff; --coin-t2: #5ab4e0; --coin-t3: #1a5070;
-      --coin-glow-h: rgba(114,212,247,0.45); --coin-glow-t: rgba(90,180,224,0.4);
-    }
-    body.skin-galaxy {
-      --coin-h1: #d8b4fe; --coin-h2: #9333ea; --coin-h3: #4a0080;
-      --coin-t1: #fbbf24; --coin-t2: #d97706; --coin-t3: #78350f;
-      --coin-glow-h: rgba(147,51,234,0.5); --coin-glow-t: rgba(251,191,36,0.45);
-    }
+/* ── BG PULSE ── */
+#bgpulse{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 50% 60%, rgba(124,107,255,0.07) 0%, transparent 70%);
+  transition:background 0.3s;
+}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Space Grotesk', sans-serif;
-      min-height: 100vh;
-      display: flex; flex-direction: column;
-      align-items: center;
-      padding: 32px 16px 80px;
-      overflow-x: hidden;
-    }
+/* ── STARS ── */
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.star{position:absolute;background:#fff;border-radius:50%;animation:tw var(--d) ease-in-out infinite var(--dl);}
+@keyframes tw{0%,100%{opacity:.08;}50%{opacity:.6;}}
 
-    /* ── STARS ── */
-    #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
-    .star {
-      position: absolute; background: white; border-radius: 50%;
-      animation: twinkle var(--dur) ease-in-out infinite var(--delay);
-    }
-    @keyframes twinkle {
-      0%,100% { opacity: 0.1; transform: scale(1); }
-      50%      { opacity: 0.7; transform: scale(1.5); }
-    }
+/* ── LAYOUT ── */
+#app{
+  position:relative;z-index:1;
+  width:100%;max-width:420px;
+  display:flex;flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
 
-    /* ── WRAPPER ── */
-    .wrapper {
-      position: relative; z-index: 1;
-      width: 100%; max-width: 640px;
-      display: flex; flex-direction: column; align-items: center; gap: 24px;
-    }
+/* ── TOP BAR ── */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px 8px;
+  flex-shrink:0;
+}
+#logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.6rem;letter-spacing:0.05em;
+  background:linear-gradient(135deg,var(--gold),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+#live-badge{
+  display:flex;align-items:center;gap:6px;
+  background:var(--red);
+  border-radius:6px;padding:3px 8px;
+  font-size:0.65rem;font-weight:800;letter-spacing:0.1em;
+  animation:livepulse 1.4s ease-in-out infinite;
+}
+@keyframes livepulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
+#live-dot{width:7px;height:7px;background:#fff;border-radius:50%;}
+#view-count{font-size:0.75rem;color:var(--muted);font-family:'Space Mono',monospace;}
 
-    /* ── HEADER ── */
-    header { text-align: center; }
-    header h1 {
-      font-size: clamp(2.2rem, 7vw, 3.6rem);
-      font-weight: 800; letter-spacing: -0.04em;
-      background: linear-gradient(135deg, var(--coin-h1) 0%, var(--accent2) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; line-height: 1;
-    }
-    .tagline {
-      margin-top: 6px; color: var(--muted);
-      font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
-    }
+/* ── SCORE BAR ── */
+#scorebar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:4px 16px 10px;
+  flex-shrink:0;
+}
+#streak-display{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2.4rem;line-height:1;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(249,217,107,0.5);
+  transition:transform 0.15s;
+}
+#streak-display.pop{animation:streakPop 0.25s ease;}
+@keyframes streakPop{0%,100%{transform:scale(1);}50%{transform:scale(1.5);}}
+#streak-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:-4px;}
+#best-score{text-align:right;}
+#best-num{font-family:'Space Mono',monospace;font-size:1.1rem;color:var(--accent);}
+#best-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;}
 
-    /* ── XP BAR ── */
-    .xp-bar-wrap {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 18px;
-    }
-    .xp-top {
-      display: flex; justify-content: space-between; align-items: baseline;
-      margin-bottom: 8px;
-    }
-    .level-badge {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.75rem; font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; letter-spacing: 0.08em;
-    }
-    .xp-label {
-      font-size: 0.72rem; color: var(--muted); letter-spacing: 0.06em;
-      font-family: 'Space Mono', monospace;
-    }
-    .xp-track {
-      height: 8px; border-radius: 99px;
-      background: var(--surface2);
-      overflow: hidden; position: relative;
-    }
-    .xp-fill {
-      position: absolute; left: 0; top: 0; bottom: 0;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 99px;
-      transition: width 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
-    }
+/* ── DANGER ZONE ── */
+#danger{
+  text-align:center;height:22px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.2em;
+  color:var(--red);opacity:0;transition:opacity 0.3s;
+  flex-shrink:0;
+}
+#danger.show{opacity:1;animation:dangerFlash 0.5s ease-in-out infinite;}
+@keyframes dangerFlash{0%,100%{opacity:1;}50%{opacity:0.3;}}
 
-    /* ── MULTIPLIER ── */
-    .multiplier {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.85rem; font-weight: 700;
-      color: var(--orange);
-      opacity: 0; transition: opacity 0.3s;
-      letter-spacing: 0.06em;
-    }
-    .multiplier.visible { opacity: 1; }
+/* ── MAIN GAME AREA ── */
+#game-area{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:0 16px;
+  position:relative;
+  overflow:hidden;
+}
 
-    /* ── COIN ── */
-    .coin-stage {
-      perspective: 900px;
-      width: 220px; height: 220px;
-      position: relative;
-    }
-    .coin {
-      width: 220px; height: 220px;
-      position: relative; transform-style: preserve-3d;
-      cursor: pointer;
-      filter: drop-shadow(0 12px 40px rgba(0,0,0,0.7));
-    }
-    .coin-face {
-      position: absolute; inset: 0; border-radius: 50%;
-      backface-visibility: hidden; -webkit-backface-visibility: hidden;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 5.5rem; user-select: none;
-    }
-    .coin-heads {
-      background: radial-gradient(circle at 32% 32%, var(--coin-h1), var(--coin-h2) 55%, var(--coin-h3));
-      box-shadow: inset -8px -8px 20px rgba(0,0,0,0.4), inset 5px 5px 14px rgba(255,255,255,0.28);
-    }
-    .coin-tails {
-      background: radial-gradient(circle at 32% 32%, var(--coin-t1), var(--coin-t2) 55%, var(--coin-t3));
-      box-shadow: inset -8px -8px 20px rgba(0,0,0,0.4), inset 5px 5px 14px rgba(255,255,255,0.32);
-      transform: rotateY(180deg);
-    }
-    .coin-edge {
-      position: absolute; inset: 0; border-radius: 50%;
-      pointer-events: none; border: 7px solid transparent;
-    }
-    .coin.showing-heads .coin-edge { border-color: var(--coin-h2); }
-    .coin.showing-tails .coin-edge { border-color: var(--coin-t2); }
+/* ── COIN ── */
+#coin-stage{
+  perspective:900px;
+  width:180px;height:180px;
+  position:relative;flex-shrink:0;
+}
+#coin{
+  width:180px;height:180px;
+  position:relative;transform-style:preserve-3d;
+  filter:drop-shadow(0 12px 40px rgba(0,0,0,0.8));
+  transition:transform 0.05s;
+}
+.cface{
+  position:absolute;inset:0;border-radius:50%;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-size:4.5rem;user-select:none;
+}
+#coin-h{background:radial-gradient(circle at 32% 32%,#f9d96b,#c89c2a 55%,#7a5c10);box-shadow:inset -6px -6px 18px rgba(0,0,0,0.5),inset 4px 4px 12px rgba(255,255,255,0.3);}
+#coin-t{background:radial-gradient(circle at 32% 32%,#dde2f0,#8090b0 55%,#3a4060);box-shadow:inset -6px -6px 18px rgba(0,0,0,0.5),inset 4px 4px 12px rgba(255,255,255,0.35);transform:rotateY(180deg);}
 
-    @keyframes coinSpin {
-      0%   { transform: rotateY(0deg) translateY(0px); }
-      30%  { transform: rotateY(1080deg) translateY(-30px); }
-      100% { transform: rotateY(3600deg) translateY(0px); }
-    }
-    .coin.spinning { animation: coinSpin 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-    .coin.land-heads { transform: rotateY(0deg); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
-    .coin.land-tails { transform: rotateY(180deg); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes spinCoin{
+  0%{transform:rotateY(0) translateY(0);}
+  40%{transform:rotateY(1440deg) translateY(-28px);}
+  100%{transform:rotateY(3600deg) translateY(0);}
+}
+#coin.spinning{animation:spinCoin var(--spin-dur,1.2s) cubic-bezier(0.25,0.46,0.45,0.94) forwards;}
+#coin.land-h{transform:rotateY(0deg);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+#coin.land-t{transform:rotateY(180deg);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);}
 
-    .coin-stage::after {
-      content: ''; position: absolute; inset: -20px; border-radius: 50%;
-      opacity: 0; transition: opacity 0.6s; pointer-events: none;
-    }
-    .coin-stage.glow-heads::after {
-      background: radial-gradient(circle, var(--coin-glow-h) 0%, transparent 70%); opacity: 1;
-    }
-    .coin-stage.glow-tails::after {
-      background: radial-gradient(circle, var(--coin-glow-t) 0%, transparent 70%); opacity: 1;
-    }
+/* coin stage glow */
+#coin-stage::after{
+  content:'';position:absolute;inset:-20px;border-radius:50%;
+  opacity:0;transition:opacity 0.5s;pointer-events:none;
+}
+#coin-stage.gh::after{background:radial-gradient(circle,rgba(249,217,107,0.45) 0%,transparent 70%);opacity:1;}
+#coin-stage.gt::after{background:radial-gradient(circle,rgba(160,168,184,0.4) 0%,transparent 70%);opacity:1;}
 
-    /* ── TAUNT ── */
-    .taunt {
-      height: 28px; display: flex; align-items: center; justify-content: center;
-      font-size: 0.9rem; color: var(--muted); font-style: italic;
-      text-align: center;
-      opacity: 0; transform: translateY(6px);
-      transition: opacity 0.3s, transform 0.3s;
-    }
-    .taunt.visible { opacity: 1; transform: translateY(0); }
-    .taunt.win { color: var(--green); }
-    .taunt.lose { color: var(--red); }
+/* wobble on danger */
+@keyframes wobble{
+  0%,100%{transform:rotate(0deg);}
+  25%{transform:rotate(-4deg);}
+  75%{transform:rotate(4deg);}
+}
+#coin.wobble{animation:wobble 0.4s ease-in-out infinite;}
 
-    /* ── RESULT ── */
-    .result-banner {
-      height: 52px; display: flex; align-items: center; justify-content: center; gap: 10px;
-    }
-    .result-text {
-      font-family: 'Space Mono', monospace;
-      font-size: 1.6rem; font-weight: 700;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      opacity: 0; transform: scale(0.8);
-      transition: opacity 0.3s, transform 0.3s;
-    }
-    .result-text.visible { opacity: 1; transform: scale(1); }
-    .result-text.heads { color: var(--coin-h1); text-shadow: 0 0 24px var(--coin-glow-h); }
-    .result-text.tails { color: var(--coin-t1); text-shadow: 0 0 24px var(--coin-glow-t); }
-    .xp-gain {
-      font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700;
-      color: var(--green);
-      opacity: 0; transform: translateY(0px);
-      transition: none;
-    }
-    .xp-gain.pop {
-      animation: xpPop 1s ease forwards;
-    }
-    @keyframes xpPop {
-      0%   { opacity: 1; transform: translateY(0px); }
-      80%  { opacity: 1; transform: translateY(-22px); }
-      100% { opacity: 0; transform: translateY(-28px); }
-    }
+/* ── PICK BUTTONS ── */
+#picks{
+  display:flex;gap:12px;width:100%;
+}
+.pick{
+  flex:1;padding:14px 8px;
+  border-radius:16px;border:2.5px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:800;
+  cursor:pointer;
+  transition:all 0.15s;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  position:relative;overflow:hidden;
+}
+.pick span{font-size:1.8rem;}
+.pick:hover:not(:disabled){transform:translateY(-3px);border-color:var(--accent);}
+.pick:active:not(:disabled){transform:scale(0.94);}
+.pick.sel-h{border-color:var(--gold);background:rgba(249,217,107,0.12);box-shadow:0 0 22px rgba(249,217,107,0.3);}
+.pick.sel-t{border-color:var(--silver);background:rgba(160,168,184,0.12);box-shadow:0 0 22px rgba(160,168,184,0.25);}
+.pick:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
 
-    /* ── PREDICTION BUTTONS ── */
-    .predict-section { width: 100%; }
-    .predict-label {
-      text-align: center; font-size: 0.72rem; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
-    }
-    .predict-btns { display: flex; gap: 12px; }
-    .predict-btn {
-      flex: 1; padding: 16px 10px;
-      border-radius: var(--radius);
-      border: 2px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1rem; font-weight: 700; cursor: pointer;
-      transition: border-color 0.2s, background 0.2s, transform 0.15s;
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-    }
-    .predict-btn span { font-size: 1.6rem; }
-    .predict-btn:hover:not(:disabled) { background: var(--surface2); transform: translateY(-2px); }
-    .predict-btn.selected-heads {
-      border-color: var(--coin-h1);
-      background: rgba(249,217,107,0.1);
-      box-shadow: 0 0 20px var(--coin-glow-h);
-    }
-    .predict-btn.selected-tails {
-      border-color: var(--coin-t1);
-      background: rgba(160,168,184,0.1);
-      box-shadow: 0 0 20px var(--coin-glow-t);
-    }
-    .predict-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+/* ── RESULT TEXT ── */
+#result-wrap{height:40px;display:flex;align-items:center;justify-content:center;}
+#result-txt{
+  font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.15em;
+  opacity:0;transform:scale(0.7);transition:opacity 0.25s,transform 0.25s;
+}
+#result-txt.show{opacity:1;transform:scale(1);}
+#result-txt.heads{color:var(--gold);text-shadow:0 0 20px rgba(249,217,107,0.6);}
+#result-txt.tails{color:var(--silver);text-shadow:0 0 20px rgba(160,168,184,0.5);}
 
-    /* ── FLIP BUTTON ── */
-    .flip-btn {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-      color: #fff; border: none; border-radius: 50px;
-      padding: 20px 60px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.2rem; font-weight: 800; letter-spacing: 0.04em;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
-      box-shadow: 0 8px 32px rgba(124,107,255,0.5);
-      position: relative; overflow: hidden;
-    }
-    .flip-btn::after {
-      content: ''; position: absolute; inset: 0;
-      background: rgba(255,255,255,0.1);
-      opacity: 0; transition: opacity 0.2s;
-    }
-    .flip-btn:hover:not(:disabled)::after { opacity: 1; }
-    .flip-btn:active:not(:disabled) { transform: scale(0.95); }
-    .flip-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+/* ── TAUNT ── */
+#taunt{
+  font-size:0.9rem;color:var(--muted);font-style:italic;text-align:center;
+  min-height:20px;transition:color 0.3s;
+  padding:0 20px;
+}
+#taunt.w{color:var(--green);}
+#taunt.l{color:var(--red);}
 
-    /* ── STATS GRID ── */
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 12px; width: 100%;
-    }
-    .stat-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px 10px; text-align: center;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .stat-card.hl-h { border-color: var(--coin-h2); box-shadow: 0 0 14px var(--coin-glow-h); }
-    .stat-card.hl-t { border-color: var(--coin-t2); box-shadow: 0 0 14px var(--coin-glow-t); }
-    .stat-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-    .stat-value {
-      font-family: 'Space Mono', monospace; font-size: 1.9rem; font-weight: 700; line-height: 1;
-    }
-    .stat-value.pop { animation: popVal 0.25s ease; }
-    @keyframes popVal { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
-    .stat-card:nth-child(1) .stat-value { color: var(--coin-h1); }
-    .stat-card:nth-child(2) .stat-value { color: var(--coin-t1); }
-    .stat-card:nth-child(3) .stat-value { color: var(--accent); }
+/* ── KEYBOARD HINT ── */
+#hint{
+  font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;
+  text-align:center;
+}
 
-    /* ── INFO ROW ── */
-    .info-row { display: flex; gap: 12px; width: 100%; }
-    .info-card {
-      flex: 1; background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 13px 14px;
-    }
-    .info-card .lbl { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-    .info-card .val { font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700; }
+/* ── FLOATING EMOJIS ── */
+.float-emoji{
+  position:fixed;font-size:2rem;pointer-events:none;z-index:200;
+  animation:floatUp 1.8s ease forwards;
+}
+@keyframes floatUp{
+  0%{opacity:1;transform:translateY(0) scale(1);}
+  100%{opacity:0;transform:translateY(-180px) scale(1.4);}
+}
 
-    /* ── BAR ── */
-    .bar-section { width: 100%; }
-    .bar-labels { display: flex; justify-content: space-between; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-    .bar-track { height: 10px; border-radius: 99px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; position: relative; }
-    .bar-fill {
-      position: absolute; left: 0; top: 0; bottom: 0;
-      background: linear-gradient(90deg, var(--coin-h3), var(--coin-h1));
-      border-radius: 99px; transition: width 0.5s cubic-bezier(0.34,1.2,0.64,1);
-    }
+/* ── LIVE CHAT ── */
+#chat-wrap{
+  position:fixed;right:0;top:0;bottom:0;
+  width:130px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:12px 8px;
+  pointer-events:none;z-index:5;
+  mask-image:linear-gradient(to bottom,transparent 0%,black 30%);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,black 30%);
+}
+#chat-msgs{display:flex;flex-direction:column;gap:5px;}
+.chat-msg{
+  background:rgba(20,20,32,0.85);
+  border-radius:8px;padding:5px 7px;
+  font-size:0.62rem;line-height:1.3;
+  animation:slideIn 0.3s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.chat-user{font-weight:800;color:var(--accent);}
+.chat-msg.hype .chat-user{color:var(--green);}
+.chat-msg.roast .chat-user{color:var(--red);}
 
-    /* ── SKINS ── */
-    .skins-section { width: 100%; }
-    .skins-title { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .skins-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .skin-btn {
-      flex: 1; min-width: 90px;
-      padding: 10px 8px;
-      border-radius: 12px;
-      border: 2px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.8rem; font-weight: 700;
-      cursor: pointer; transition: all 0.2s;
-      display: flex; flex-direction: column; align-items: center; gap: 3px;
-      position: relative; overflow: hidden;
-    }
-    .skin-btn .skin-icon { font-size: 1.3rem; }
-    .skin-btn.active { border-color: var(--accent); background: rgba(124,107,255,0.15); }
-    .skin-btn.locked { opacity: 0.45; cursor: not-allowed; }
-    .skin-btn .lock-badge {
-      position: absolute; top: 4px; right: 5px;
-      font-size: 0.6rem; color: var(--muted);
-    }
-    .skin-btn .unlock-xp {
-      font-size: 0.6rem; color: var(--muted); font-weight: 400;
-    }
-    .skin-btn:not(.locked):hover { transform: translateY(-2px); border-color: var(--accent); }
+/* ── SCREEN FLASH ── */
+#flash{position:fixed;inset:0;pointer-events:none;z-index:100;opacity:0;transition:opacity 0.1s;}
 
-    /* ── HISTORY ── */
-    .history-section { width: 100%; }
-    .history-title { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .history-pills { display: flex; flex-wrap: wrap; gap: 6px; }
-    .pill {
-      width: 30px; height: 30px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem;
-      animation: pillIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
-      position: relative;
-    }
-    .pill.heads { background: radial-gradient(circle at 35% 35%, var(--coin-h1), var(--coin-h3)); }
-    .pill.tails { background: radial-gradient(circle at 35% 35%, var(--coin-t1), var(--coin-t3)); }
-    .pill.correct::after {
-      content: '✓'; position: absolute; bottom: -2px; right: -2px;
-      font-size: 0.5rem; background: var(--green); color: #000;
-      border-radius: 50%; width: 11px; height: 11px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 900;
-    }
-    .pill.wrong::after {
-      content: '✗'; position: absolute; bottom: -2px; right: -2px;
-      font-size: 0.5rem; background: var(--red); color: #fff;
-      border-radius: 50%; width: 11px; height: 11px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 900;
-    }
-    @keyframes pillIn { from { opacity:0; transform: scale(0.3) rotate(-40deg); } to { opacity:1; transform: scale(1); } }
-    .history-empty { color: var(--muted); font-size: 0.82rem; font-style: italic; }
+/* ── GAME OVER SCREEN ── */
+#gameover{
+  position:fixed;inset:0;z-index:150;
+  background:rgba(5,5,10,0.97);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;padding:32px 24px;
+  text-align:center;
+}
+#gameover.show{display:flex;animation:goIn 0.4s cubic-bezier(0.34,1.2,0.64,1);}
+@keyframes goIn{from{transform:scale(0.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+#go-skull{font-size:5rem;animation:skullBounce 0.6s ease infinite alternate;}
+@keyframes skullBounce{from{transform:translateY(0) rotate(-5deg);}to{transform:translateY(-10px) rotate(5deg);}}
+#go-title{
+  font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:0.1em;
+  color:var(--red);text-shadow:0 0 30px rgba(255,51,85,0.7);
+}
+#go-roast{font-size:1rem;color:var(--muted);font-style:italic;max-width:280px;line-height:1.5;}
+#go-score-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:20px 40px;
+  display:flex;flex-direction:column;gap:8px;
+}
+#go-score-num{
+  font-family:'Bebas Neue',sans-serif;font-size:4rem;color:var(--gold);
+  text-shadow:0 0 30px rgba(249,217,107,0.5);line-height:1;
+}
+#go-score-label{font-size:0.7rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;}
+#go-best{font-size:0.85rem;color:var(--accent);}
+#go-share{font-size:0.8rem;color:var(--muted);font-style:italic;}
+#play-again{
+  background:linear-gradient(135deg,var(--accent),var(--pink));
+  color:#fff;border:none;border-radius:50px;
+  padding:18px 56px;
+  font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:800;
+  cursor:pointer;
+  box-shadow:0 8px 32px rgba(124,107,255,0.5);
+  transition:transform 0.15s;
+}
+#play-again:hover{transform:scale(1.05);}
+#play-again:active{transform:scale(0.95);}
+#go-stats{font-size:0.72rem;color:var(--muted);display:flex;gap:20px;}
+#go-stats span{display:flex;flex-direction:column;align-items:center;gap:2px;}
+#go-stats b{font-family:'Space Mono',monospace;color:var(--text);font-size:0.95rem;}
 
-    /* ── RESET ── */
-    .reset-btn {
-      background: transparent; color: var(--muted);
-      border: 1px solid var(--border); border-radius: 50px;
-      padding: 10px 28px; font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.82rem; cursor: pointer; transition: color 0.2s, border-color 0.2s;
-    }
-    .reset-btn:hover { color: var(--text); border-color: var(--muted); }
+/* ── START SCREEN ── */
+#startscreen{
+  position:fixed;inset:0;z-index:150;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;padding:32px 24px;text-align:center;
+}
+#ss-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:4.5rem;letter-spacing:0.05em;
+  background:linear-gradient(135deg,var(--gold),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;
+}
+#ss-sub{font-size:0.8rem;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;}
+#ss-coin{font-size:5rem;animation:ssFloat 2s ease-in-out infinite;}
+@keyframes ssFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+#ss-rules{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:18px 22px;max-width:300px;
+  font-size:0.85rem;line-height:1.7;color:var(--muted);text-align:left;
+}
+#ss-rules b{color:var(--text);}
+#start-btn{
+  background:linear-gradient(135deg,var(--accent),var(--pink));
+  color:#fff;border:none;border-radius:50px;
+  padding:18px 60px;
+  font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:800;
+  cursor:pointer;box-shadow:0 8px 32px rgba(124,107,255,0.5);
+  transition:transform 0.15s;
+  animation:btnPulse 1.5s ease-in-out infinite;
+}
+@keyframes btnPulse{0%,100%{box-shadow:0 8px 32px rgba(124,107,255,0.5);}50%{box-shadow:0 8px 48px rgba(124,107,255,0.9);}}
+#start-btn:hover{transform:scale(1.05);}
 
-    /* ── SOUND BTN ── */
-    .sound-toggle {
-      position: fixed; top: 16px; right: 16px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 50%; width: 42px; height: 42px; font-size: 1.1rem;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: border-color 0.2s; z-index: 10;
-    }
-    .sound-toggle:hover { border-color: var(--accent); }
+/* ── CONFETTI ── */
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:50;}
 
-    /* ── CONFETTI ── */
-    #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+/* ── SOUND BTN ── */
+#snd{
+  position:fixed;top:14px;left:14px;z-index:200;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:50%;width:36px;height:36px;font-size:1rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
 
-    /* ── LEVEL UP TOAST ── */
-    .levelup-toast {
-      position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px);
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; border-radius: 50px; padding: 12px 28px;
-      font-family: 'Space Mono', monospace; font-size: 0.9rem; font-weight: 700;
-      letter-spacing: 0.08em; opacity: 0; pointer-events: none;
-      transition: opacity 0.3s, transform 0.3s;
-      z-index: 100; white-space: nowrap;
-      box-shadow: 0 8px 32px rgba(124,107,255,0.6);
-    }
-    .levelup-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ── SHAKE ── */
+@keyframes screenShake{
+  0%,100%{transform:translate(0,0) rotate(0);}
+  20%{transform:translate(-10px,4px) rotate(-1.5deg);}
+  40%{transform:translate(10px,-4px) rotate(1.5deg);}
+  60%{transform:translate(-6px,2px) rotate(-0.8deg);}
+  80%{transform:translate(6px,-2px) rotate(0.8deg);}
+}
+body.shake{animation:screenShake 0.45s ease;}
 
-    /* ── SHAKE ── */
-    @keyframes shake {
-      0%,100% { transform: translateX(0); }
-      20% { transform: translateX(-8px) rotate(-1deg); }
-      40% { transform: translateX(8px) rotate(1deg); }
-      60% { transform: translateX(-5px); }
-      80% { transform: translateX(5px); }
-    }
-    body.shake { animation: shake 0.4s ease; }
-
-    /* ── DIVIDER ── */
-    .divider { width: 100%; height: 1px; background: var(--border); }
-
-    @media (max-width: 420px) {
-      .coin-stage, .coin { width: 180px; height: 180px; }
-      .coin-face { font-size: 4.5rem; }
-      .skins-row { gap: 6px; }
-      .skin-btn { min-width: 70px; font-size: 0.72rem; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .coin.spinning { animation: none; }
-    }
-  </style>
+@media(max-width:380px){
+  #coin-stage,#coin{width:150px;height:150px;}
+  .cface{font-size:3.8rem;}
+  #chat-wrap{width:110px;}
+}
+</style>
 </head>
-<body class="skin-classic">
+<body>
 
 <div id="stars"></div>
+<div id="bgpulse"></div>
 <canvas id="confetti-canvas"></canvas>
-<div class="levelup-toast" id="levelupToast">⚡ LEVEL UP!</div>
-<button class="sound-toggle" id="soundBtn" title="Toggle sound">🔊</button>
+<div id="flash"></div>
+<button id="snd">🔊</button>
 
-<div class="wrapper">
+<!-- FAKE LIVE CHAT -->
+<div id="chat-wrap"><div id="chat-msgs"></div></div>
 
-  <header>
-    <h1>FlipaCoin</h1>
-    <p class="tagline">predict · flip · dominate</p>
-  </header>
+<!-- START SCREEN -->
+<div id="startscreen">
+  <div id="ss-coin">🪙</div>
+  <div id="ss-logo">FlipaCoin</div>
+  <div id="ss-sub">no cap. all skill. zero mercy.</div>
+  <div id="ss-rules">
+    <b>how it works:</b><br>
+    👆 pick heads or tails<br>
+    🪙 flip the coin<br>
+    ✅ right = streak goes up<br>
+    ❌ wrong = <b>game over</b><br>
+    🔥 higher streak = more unhinged<br>
+    <br>
+    <b>keyboard:</b> H = heads · T = tails · Space = flip
+  </div>
+  <button id="start-btn" onclick="startGame()">let's go 🚀</button>
+</div>
 
-  <!-- XP Bar -->
-  <div class="xp-bar-wrap">
-    <div class="xp-top">
-      <span class="level-badge" id="levelBadge">LEVEL 1 — ROOKIE</span>
-      <span class="xp-label" id="xpLabel">0 / 100 XP</span>
+<!-- GAME OVER SCREEN -->
+<div id="gameover">
+  <div id="go-skull">💀</div>
+  <div id="go-title">COOKED.</div>
+  <div id="go-roast" id="go-roast"></div>
+  <div id="go-score-wrap">
+    <div id="go-score-num">0</div>
+    <div id="go-score-label">correct in a row</div>
+    <div id="go-best"></div>
+  </div>
+  <div id="go-stats">
+    <span><b id="go-total">0</b>total flips</span>
+    <span><b id="go-acc">—</b>accuracy</span>
+    <span><b id="go-alltime">0</b>all-time best</span>
+  </div>
+  <div id="go-share"></div>
+  <button id="play-again" onclick="restartGame()">one more 🔄</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- Top Bar -->
+  <div id="topbar">
+    <div id="logo">FlipaCoin</div>
+    <div id="live-badge"><div id="live-dot"></div>LIVE</div>
+    <div id="view-count">👁 <span id="views">1,337</span></div>
+  </div>
+
+  <!-- Score Bar -->
+  <div id="scorebar">
+    <div>
+      <div id="streak-display">0</div>
+      <div id="streak-label">🔥 streak</div>
     </div>
-    <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
-  </div>
-
-  <!-- Multiplier -->
-  <div class="multiplier" id="multiplierEl">🔥 2× XP STREAK MULTIPLIER</div>
-
-  <!-- Coin -->
-  <div class="coin-stage" id="coinStage">
-    <div class="coin showing-heads" id="coin">
-      <div class="coin-face coin-heads" id="headsFace">👑</div>
-      <div class="coin-face coin-tails" id="tailsFace">🦅</div>
-      <div class="coin-edge"></div>
+    <div id="best-score">
+      <div id="best-num">0</div>
+      <div id="best-label">⭐ session best</div>
     </div>
   </div>
 
-  <!-- Result + XP gain -->
-  <div class="result-banner">
-    <div class="result-text" id="resultText"></div>
-    <div class="xp-gain" id="xpGain"></div>
-  </div>
+  <!-- Danger -->
+  <div id="danger">⚠️ DANGER ZONE ⚠️</div>
 
-  <!-- Taunt -->
-  <div class="taunt" id="tauntEl"></div>
+  <!-- Game Area -->
+  <div id="game-area">
 
-  <!-- Prediction -->
-  <div class="predict-section">
-    <div class="predict-label">Pick your side before you flip</div>
-    <div class="predict-btns">
-      <button class="predict-btn" id="pickHeads" onclick="pickSide('heads')">
+    <!-- Coin -->
+    <div id="coin-stage">
+      <div id="coin" class="land-h">
+        <div class="cface" id="coin-h">👑</div>
+        <div class="cface" id="coin-t">🦅</div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="result-wrap">
+      <div id="result-txt"></div>
+    </div>
+
+    <!-- Taunt -->
+    <div id="taunt">pick a side and flip it 👆</div>
+
+    <!-- Picks -->
+    <div id="picks">
+      <button class="pick" id="ph" onclick="pick('h')">
         <span>👑</span>HEADS
       </button>
-      <button class="predict-btn" id="pickTails" onclick="pickSide('tails')">
+      <button class="pick" id="pt" onclick="pick('t')">
         <span>🦅</span>TAILS
       </button>
     </div>
+
+    <!-- Hint -->
+    <div id="hint">H = heads &nbsp;·&nbsp; T = tails &nbsp;·&nbsp; SPACE = flip</div>
+
   </div>
-
-  <!-- Flip Button -->
-  <button class="flip-btn" id="flipBtn">Flip the Coin</button>
-
-  <!-- Stats -->
-  <div class="stats-grid">
-    <div class="stat-card" id="cardHeads">
-      <div class="stat-label">Heads 👑</div>
-      <div class="stat-value" id="headsCount">0</div>
-    </div>
-    <div class="stat-card" id="cardTails">
-      <div class="stat-label">Tails 🦅</div>
-      <div class="stat-value" id="tailsCount">0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Total</div>
-      <div class="stat-value" id="totalCount">0</div>
-    </div>
-  </div>
-
-  <!-- Info Row -->
-  <div class="info-row">
-    <div class="info-card">
-      <div class="lbl">Accuracy</div>
-      <div class="val" id="accuracyVal">—</div>
-    </div>
-    <div class="info-card">
-      <div class="lbl">Streak 🔥</div>
-      <div class="val" id="streakVal">—</div>
-    </div>
-    <div class="info-card">
-      <div class="lbl">Best Streak</div>
-      <div class="val" id="longestStreak">—</div>
-    </div>
-  </div>
-
-  <!-- Bar -->
-  <div class="bar-section">
-    <div class="bar-labels"><span>👑 Heads</span><span>Tails 🦅</span></div>
-    <div class="bar-track"><div class="bar-fill" id="barFill" style="width:50%"></div></div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- Skins -->
-  <div class="skins-section">
-    <div class="skins-title">🪙 Coin Skins</div>
-    <div class="skins-row" id="skinsRow"></div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- History -->
-  <div class="history-section">
-    <div class="history-title">Last 30 flips — ✓ correct guess &nbsp;✗ wrong</div>
-    <div class="history-pills" id="historyPills"><span class="history-empty">No flips yet</span></div>
-  </div>
-
-  <button class="reset-btn" id="resetBtn">Reset Everything</button>
 
 </div>
 
 <script>
-/* ══════════════════════════════════════════
-   SKIN DEFINITIONS
-══════════════════════════════════════════ */
-const SKINS = [
-  { id: 'classic',  label: 'Classic',  icon: '🪙', xpRequired: 0,   headsEmoji: '👑', tailsEmoji: '🦅' },
-  { id: 'neon',     label: 'Neon',     icon: '💜', xpRequired: 200,  headsEmoji: '⚡', tailsEmoji: '🌀' },
-  { id: 'fire',     label: 'Fire',     icon: '🔥', xpRequired: 500,  headsEmoji: '🔥', tailsEmoji: '💀' },
-  { id: 'ice',      label: 'Ice',      icon: '❄️', xpRequired: 1000, headsEmoji: '❄️', tailsEmoji: '💎' },
-  { id: 'galaxy',   label: 'Galaxy',   icon: '🌌', xpRequired: 2000, headsEmoji: '🌟', tailsEmoji: '🪐' },
+/* ══ DATA ══ */
+const TAUNT_WIN = [
+  "not a coincidence fr 🔮","you're built different 💪","the coin bows to you 👑",
+  "W rizz","ok oracle calm down 😭","npc coin couldn't stop you",
+  "gigachad move","slay bestie ✨","the universe said yes",
+  "no cap that was clean","ate and left no crumbs","based","literally unbeatable rn",
+  "the coin is scared of you","rent free in this coin's head 💀",
 ];
-
-/* ══════════════════════════════════════════
-   LEVEL TABLE
-══════════════════════════════════════════ */
-const LEVELS = [
-  { lvl:1,  xp:0,    name:'Rookie' },
-  { lvl:2,  xp:100,  name:'Flipper' },
-  { lvl:3,  xp:250,  name:'Gambler' },
-  { lvl:4,  xp:500,  name:'Hustler' },
-  { lvl:5,  xp:900,  name:'Shark' },
-  { lvl:6,  xp:1400, name:'Oracle' },
-  { lvl:7,  xp:2000, name:'Legend' },
-  { lvl:8,  xp:3000, name:'God of Coins' },
+const TAUNT_LOSE = [
+  "💀 you got cooked","L + ratio + wrong","the coin said lol no",
+  "skill issue bestie 😭","bro really said that 💀","touch grass and try again",
+  "the audacity 😤","that was NOT it","back to the trenches 🪖",
+  "f in the chat 🪦","the coin disrespected you","not even close dawg",
+  "imagine being wrong 😂","npc behavior","cooked. absolutely cooked.",
+  "the coin said nah fam","average prediction","certified L moment",
 ];
-
-/* ══════════════════════════════════════════
-   TAUNTS
-══════════════════════════════════════════ */
-const TAUNTS_WIN = [
-  "you called it 🔮", "big brain energy 🧠", "the coin fears you",
-  "literally unbeatable rn", "that's what i'm talking about 🔥",
-  "are you even human??", "built different fr", "the universe chose you",
-  "ok oracle, calm down", "📈 stonks", "clean. very clean.", "god mode activated",
+const TAUNT_NODANGER = [
+  "pick a side bestie 👆","scared? 🤡","waiting... 🥱",
+  "pick H or T first 😭","the coin can't flip itself","hello?? 👋",
 ];
-const TAUNTS_LOSE = [
-  "you really thought 💀", "not even close", "the coin disrespected you",
-  "L + ratio", "skill issue 🫠", "touch grass and try again",
-  "bro said heads 💀", "the coin said no.", "that's rough buddy",
-  "the audacity 😭", "back to the trenches", "f in chat 🪦",
+const DANGER_TAUNTS = [
+  "bro is NOT stopping 😱","CALL THE POLICE","this is illegal",
+  "someone check on them 🚨","main character energy","the coin is crying rn 😭",
+  "hall of fame behavior","i'm tweeting this","unreal",
 ];
-const TAUNTS_NOPICK = [
-  "feeling lucky today?", "no pick? bold strategy", "chaos mode activated 🎲",
-  "living dangerously", "a true gambler", "commitment issues?",
+const GO_ROASTS = [
+  ["1","bro lasted one flip 💀 delete the app"],
+  ["2","TWO? that's it?? 💀"],
+  ["3","three flips and done. embarrassing."],
+  ["5","you had potential... gone. 🕊️"],
+  ["7","7 and out. so close to not being mid."],
+  ["10","ok 10 is fine i guess. still cooked tho."],
+  ["15","15 streak! still lost tho 😭"],
+  ["20","20 is actually kinda valid ngl 👀"],
+  ["25","25?? ok we see you 🔥"],
+  ["30","30 streak??? you're built different fr"],
+  ["50","bro hit 50 and STILL got cooked 💀"],
+  ["99","literally a coin god and you fell off 💔"],
+  ["∞","ok you need to go outside rn"],
 ];
+const CHAT_USERS = [
+  ["xXdarkflip69","hype"],["coinqueennn","hype"],["streakgod_","hype"],
+  ["fr_fr_nocap","hype"],["iykyk2024","hype"],["npcvibes","roast"],
+  ["404brain","roast"],["skill_issue_","roast"],["midcheck_","roast"],
+  ["giga_skeptic","roast"],["coinwhisperer","hype"],["rizzmaster99","hype"],
+  ["L_hunter","roast"],["ratio_machine","roast"],["based_dept","hype"],
+];
+const CHAT_HYPE = [
+  "LETS GOO 🔥🔥","W move!!!","no way 😭","LMAOOO","slay","this is insane",
+  "POV: goat","i'm crying 💀","not the streak omg","called it 🫡",
+  "POGGERS","the audacity","bussin fr","SHEEEESH","bestie ate",
+  "chat is he/she built different?","🔥🔥🔥","W + ratio","no cap tho",
+];
+const CHAT_ROAST = [
+  "💀💀💀","L incoming","this is painful to watch","bro is cooked",
+  "skill issue fr","not gonna make it","i can't look","f","rip",
+  "cooked. deleted.","average player","help them","🪦","ratio",
+];
+const FLOAT_WIN  = ["🔥","💯","👑","⚡","✨","🚀","😤","🫡","💪","🎯"];
+const FLOAT_LOSE = ["💀","😭","🪦","💔","😂","🫠","❌","🤡","📉","👎"];
 
-/* ══════════════════════════════════════════
-   STATE
-══════════════════════════════════════════ */
-let state = loadState() || freshState();
-let isFlipping = false;
-let soundOn = true;
-let prediction = null; // 'heads' | 'tails' | null
+/* ══ STATE ══ */
+let streak=0, sessionBest=0, allTimeBest=0, totalFlips=0, totalCorrect=0;
+let flipping=false, chosen=null, gameActive=false;
+let spinDur=1.2, viewCount=1337;
+let chatInterval=null, viewInterval=null;
 
-function freshState() {
-  return {
-    heads: 0, tails: 0, total: 0,
-    correct: 0,
-    history: [],           // { result, prediction }
-    currentStreak: 0,
-    currentStreakType: null,
-    longestStreak: 0,
-    correctStreak: 0,      // consecutive correct predictions
-    xp: 0,
-    totalXp: 0,            // cumulative (never resets per level)
-    level: 1,
-    activeSkin: 'classic',
-  };
-}
+/* ══ PERSIST ══ */
+function saveBest(){try{localStorage.setItem('flipacoin_best',allTimeBest);}catch(e){}}
+function loadBest(){try{return parseInt(localStorage.getItem('flipacoin_best'))||0;}catch(e){return 0;}}
+allTimeBest=loadBest();
 
-/* ══════════════════════════════════════════
-   AUDIO
-══════════════════════════════════════════ */
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
+/* ══ AUDIO ══ */
+const AC=window.AudioContext||window.webkitAudioContext;
 let actx;
-function ac() { if (!actx) actx = new AudioCtx(); return actx; }
+function gac(){if(!actx)actx=new AC();return actx;}
+let soundOn=true;
 
-function playWhoosh() {
-  if (!soundOn) return;
-  const a = ac(), buf = a.createBuffer(1, a.sampleRate * 0.5, a.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/d.length, 2);
-  const src = a.createBufferSource(); src.buffer = buf;
-  const filt = a.createBiquadFilter(); filt.type = 'bandpass'; filt.frequency.value = 800;
-  filt.frequency.linearRampToValueAtTime(180, a.currentTime+0.5);
-  const gain = a.createGain(); gain.gain.setValueAtTime(0.22, a.currentTime);
-  gain.gain.linearRampToValueAtTime(0, a.currentTime+0.5);
-  src.connect(filt); filt.connect(gain); gain.connect(a.destination);
-  src.start(); src.stop(a.currentTime+0.5);
+function sWhoosh(){
+  if(!soundOn)return;
+  const a=gac(),buf=a.createBuffer(1,a.sampleRate*0.4,a.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.5);
+  const s=a.createBufferSource();s.buffer=buf;
+  const f=a.createBiquadFilter();f.type='bandpass';f.frequency.value=600;
+  f.frequency.linearRampToValueAtTime(150,a.currentTime+0.4);
+  const g=a.createGain();g.gain.setValueAtTime(0.2,a.currentTime);
+  g.gain.linearRampToValueAtTime(0,a.currentTime+0.4);
+  s.connect(f);f.connect(g);g.connect(a.destination);s.start();s.stop(a.currentTime+0.4);
 }
-
-function playClink(isHeads) {
-  if (!soundOn) return;
-  [0, 0.03, 0.07].forEach((off, i) => {
-    const osc = ac().createOscillator(), g = ac().createGain();
-    const f = isHeads ? 1300 - i*130 : 950 - i*90;
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(f, ac().currentTime+off);
-    osc.frequency.exponentialRampToValueAtTime(f*0.45, ac().currentTime+off+0.2);
-    g.gain.setValueAtTime(0.2, ac().currentTime+off);
-    g.gain.exponentialRampToValueAtTime(0.0001, ac().currentTime+off+0.35);
-    osc.connect(g); g.connect(ac().destination);
-    osc.start(ac().currentTime+off); osc.stop(ac().currentTime+off+0.4);
+function sClink(h){
+  if(!soundOn)return;
+  [0,0.03,0.07].forEach((off,i)=>{
+    const o=gac().createOscillator(),g=gac().createGain();
+    const f=h?1300-i*130:950-i*90;
+    o.type='sine';o.frequency.setValueAtTime(f,gac().currentTime+off);
+    o.frequency.exponentialRampToValueAtTime(f*0.4,gac().currentTime+off+0.2);
+    g.gain.setValueAtTime(0.18,gac().currentTime+off);
+    g.gain.exponentialRampToValueAtTime(0.0001,gac().currentTime+off+0.3);
+    o.connect(g);g.connect(gac().destination);
+    o.start(gac().currentTime+off);o.stop(gac().currentTime+off+0.35);
+  });
+}
+function sWin(){
+  if(!soundOn)return;
+  [0,0.1,0.2].forEach((off,i)=>{
+    const o=gac().createOscillator(),g=gac().createGain();
+    o.type='sine';o.frequency.value=[523,659,784][i];
+    g.gain.setValueAtTime(0.13,gac().currentTime+off);
+    g.gain.exponentialRampToValueAtTime(0.0001,gac().currentTime+off+0.25);
+    o.connect(g);g.connect(gac().destination);
+    o.start(gac().currentTime+off);o.stop(gac().currentTime+off+0.3);
+  });
+}
+function sLose(){
+  if(!soundOn)return;
+  const o=gac().createOscillator(),g=gac().createGain();
+  o.type='sawtooth';o.frequency.setValueAtTime(220,gac().currentTime);
+  o.frequency.linearRampToValueAtTime(60,gac().currentTime+0.4);
+  g.gain.setValueAtTime(0.15,gac().currentTime);
+  g.gain.linearRampToValueAtTime(0,gac().currentTime+0.4);
+  o.connect(g);g.connect(gac().destination);o.start();o.stop(gac().currentTime+0.45);
+}
+function sDanger(){
+  if(!soundOn)return;
+  const o=gac().createOscillator(),g=gac().createGain();
+  o.type='square';o.frequency.value=80;
+  g.gain.setValueAtTime(0.06,gac().currentTime);
+  g.gain.linearRampToValueAtTime(0,gac().currentTime+0.2);
+  o.connect(g);g.connect(gac().destination);o.start();o.stop(gac().currentTime+0.25);
+}
+function sMilestone(){
+  if(!soundOn)return;
+  [0,0.08,0.16,0.28].forEach((off,i)=>{
+    const o=gac().createOscillator(),g=gac().createGain();
+    o.type='sine';o.frequency.value=[523,659,784,1047][i];
+    g.gain.setValueAtTime(0.16,gac().currentTime+off);
+    g.gain.exponentialRampToValueAtTime(0.0001,gac().currentTime+off+0.3);
+    o.connect(g);g.connect(gac().destination);
+    o.start(gac().currentTime+off);o.stop(gac().currentTime+off+0.35);
   });
 }
 
-function playSuccess() {
-  if (!soundOn) return;
-  [0, 0.12, 0.24].forEach((off, i) => {
-    const osc = ac().createOscillator(), g = ac().createGain();
-    const freqs = [523, 659, 784];
-    osc.type = 'sine'; osc.frequency.value = freqs[i];
-    g.gain.setValueAtTime(0.15, ac().currentTime+off);
-    g.gain.exponentialRampToValueAtTime(0.0001, ac().currentTime+off+0.25);
-    osc.connect(g); g.connect(ac().destination);
-    osc.start(ac().currentTime+off); osc.stop(ac().currentTime+off+0.3);
-  });
-}
-
-function playFail() {
-  if (!soundOn) return;
-  const osc = ac().createOscillator(), g = ac().createGain();
-  osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, ac().currentTime);
-  osc.frequency.linearRampToValueAtTime(80, ac().currentTime+0.3);
-  g.gain.setValueAtTime(0.12, ac().currentTime);
-  g.gain.linearRampToValueAtTime(0, ac().currentTime+0.3);
-  osc.connect(g); g.connect(ac().destination);
-  osc.start(); osc.stop(ac().currentTime+0.35);
-}
-
-function playLevelUp() {
-  if (!soundOn) return;
-  [0,0.1,0.2,0.35].forEach((off,i) => {
-    const osc = ac().createOscillator(), g = ac().createGain();
-    const f = [523,659,784,1047][i];
-    osc.type = 'sine'; osc.frequency.value = f;
-    g.gain.setValueAtTime(0.18, ac().currentTime+off);
-    g.gain.exponentialRampToValueAtTime(0.0001, ac().currentTime+off+0.3);
-    osc.connect(g); g.connect(ac().destination);
-    osc.start(ac().currentTime+off); osc.stop(ac().currentTime+off+0.35);
-  });
-}
-
-/* ══════════════════════════════════════════
-   CONFETTI
-══════════════════════════════════════════ */
-const confCanvas = document.getElementById('confetti-canvas');
-const cctx = confCanvas.getContext('2d');
-let pieces = [];
-function resizeConf() { confCanvas.width = innerWidth; confCanvas.height = innerHeight; }
-resizeConf(); window.addEventListener('resize', resizeConf);
-
-function launchConfetti(colors) {
-  for (let i = 0; i < 90; i++) {
-    pieces.push({
-      x: Math.random()*confCanvas.width, y: -10,
-      w: Math.random()*10+4, h: Math.random()*5+3,
-      color: colors[Math.floor(Math.random()*colors.length)],
-      vx: (Math.random()-0.5)*6, vy: Math.random()*4+2,
-      angle: Math.random()*Math.PI*2, spin: (Math.random()-0.5)*0.22,
-      life: 1,
-    });
+/* ══ CONFETTI ══ */
+const cc=document.getElementById('confetti-canvas');
+const cx=cc.getContext('2d');
+let bits=[];
+function resCC(){cc.width=innerWidth;cc.height=innerHeight;}
+resCC();window.addEventListener('resize',resCC);
+function burst(win){
+  const cols=win
+    ?['#f9d96b','#c89c2a','#fff4a3','#ff4da6','#7c6bff']
+    :['#ff3355','#ff8c00','#ff4da6','#ffffff'];
+  for(let i=0;i<70;i++){
+    bits.push({x:Math.random()*cc.width,y:-10,
+      w:Math.random()*10+4,h:Math.random()*5+3,
+      col:cols[Math.floor(Math.random()*cols.length)],
+      vx:(Math.random()-0.5)*5,vy:Math.random()*3+2,
+      a:Math.random()*Math.PI*2,sp:(Math.random()-0.5)*0.2,life:1});
   }
 }
-function tickConfetti() {
-  cctx.clearRect(0,0,confCanvas.width,confCanvas.height);
-  pieces = pieces.filter(p => p.life > 0);
-  pieces.forEach(p => {
-    p.x += p.vx; p.y += p.vy; p.angle += p.spin; p.vy += 0.09;
-    if (p.y > confCanvas.height) p.life = 0;
-    p.life -= 0.007;
-    cctx.save();
-    cctx.globalAlpha = Math.max(0, p.life);
-    cctx.translate(p.x, p.y); cctx.rotate(p.angle);
-    cctx.fillStyle = p.color;
-    cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-    cctx.restore();
+function tickCC(){
+  cx.clearRect(0,0,cc.width,cc.height);
+  bits=bits.filter(b=>b.life>0);
+  bits.forEach(b=>{
+    b.x+=b.vx;b.y+=b.vy;b.a+=b.sp;b.vy+=0.1;
+    if(b.y>cc.height)b.life=0;b.life-=0.008;
+    cx.save();cx.globalAlpha=Math.max(0,b.life);
+    cx.translate(b.x,b.y);cx.rotate(b.a);
+    cx.fillStyle=b.col;cx.fillRect(-b.w/2,-b.h/2,b.w,b.h);
+    cx.restore();
   });
-  if (pieces.length) requestAnimationFrame(tickConfetti);
-}
-function burst(isHeads) {
-  const skin = SKINS.find(s => s.id === state.activeSkin);
-  const colors = isHeads
-    ? ['#f9d96b','#c89c2a','#fff4a3','#b8860b']
-    : ['#e8eaf0','#a0a8b8','#ffffff','#4a5068'];
-  launchConfetti(colors);
-  tickConfetti();
+  if(bits.length)requestAnimationFrame(tickCC);
 }
 
-/* ══════════════════════════════════════════
-   PICK SIDE
-══════════════════════════════════════════ */
-function pickSide(side) {
-  if (isFlipping) return;
-  prediction = prediction === side ? null : side;
-  document.getElementById('pickHeads').className = 'predict-btn' + (prediction === 'heads' ? ' selected-heads' : '');
-  document.getElementById('pickTails').className = 'predict-btn' + (prediction === 'tails' ? ' selected-tails' : '');
+/* ══ FLOAT EMOJI ══ */
+function floatEmoji(emoji,x,y){
+  const el=document.createElement('div');
+  el.className='float-emoji';el.textContent=emoji;
+  el.style.left=(x||Math.random()*60+20)+'%';
+  el.style.top=(y||Math.random()*30+40)+'%';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1900);
 }
-
-/* ══════════════════════════════════════════
-   XP + LEVEL
-══════════════════════════════════════════ */
-function getLevelInfo(totalXp) {
-  let cur = LEVELS[0], next = LEVELS[1];
-  for (let i = LEVELS.length-1; i >= 0; i--) {
-    if (totalXp >= LEVELS[i].xp) { cur = LEVELS[i]; next = LEVELS[i+1] || null; break; }
+function spawnFloats(arr,n){
+  for(let i=0;i<n;i++){
+    setTimeout(()=>{
+      floatEmoji(arr[Math.floor(Math.random()*arr.length)]);
+    },i*120);
   }
-  return { cur, next };
 }
 
-function awardXP(amount) {
-  const prevTotal = state.totalXp;
-  state.xp += amount;
-  state.totalXp += amount;
+/* ══ CHAT ══ */
+function addChat(msg,type){
+  const wrap=document.getElementById('chat-msgs');
+  const u=CHAT_USERS[Math.floor(Math.random()*CHAT_USERS.length)];
+  const div=document.createElement('div');
+  div.className='chat-msg '+(type||u[1]);
+  div.innerHTML=`<div class="chat-user">@${u[0]}</div>${msg}`;
+  wrap.appendChild(div);
+  while(wrap.children.length>8)wrap.removeChild(wrap.firstChild);
+}
+function randomChat(type){
+  if(type==='hype')addChat(CHAT_HYPE[Math.floor(Math.random()*CHAT_HYPE.length)],'hype');
+  else addChat(CHAT_ROAST[Math.floor(Math.random()*CHAT_ROAST.length)],'roast');
+}
+function startChat(){
+  chatInterval=setInterval(()=>{
+    if(!gameActive)return;
+    randomChat(Math.random()<0.6?'hype':'roast');
+  },2200);
+}
+function startViews(){
+  viewInterval=setInterval(()=>{
+    viewCount+=Math.floor(Math.random()*8-2);
+    if(viewCount<100)viewCount=100;
+    document.getElementById('views').textContent=viewCount.toLocaleString();
+  },1800);
+}
 
-  const { cur: prevLvl } = getLevelInfo(prevTotal);
-  const { cur: newLvl } = getLevelInfo(state.totalXp);
+/* ══ FLASH ══ */
+function flash(color,dur){
+  const f=document.getElementById('flash');
+  f.style.background=color;f.style.opacity='1';
+  setTimeout(()=>{f.style.opacity='0';},dur||80);
+}
 
-  if (newLvl.lvl > prevLvl.lvl) {
-    state.level = newLvl.lvl;
-    showLevelUpToast(newLvl);
-    playLevelUp();
-    launchConfetti(['#7c6bff','#ff6b9d','#ffffff','#c8b4ff']);
-    tickConfetti();
+/* ══ DANGER ZONE ══ */
+function updateDanger(){
+  const d=document.getElementById('danger');
+  const coin=document.getElementById('coin');
+  if(streak>=5){
+    d.classList.add('show');
+    coin.classList.add('wobble');
+    if(streak>=10)sDanger();
+  } else {
+    d.classList.remove('show');
+    coin.classList.remove('wobble');
   }
-  renderXP();
-  renderSkins();
 }
 
-function showLevelUpToast(lvl) {
-  const t = document.getElementById('levelupToast');
-  t.textContent = `⚡ LEVEL ${lvl.lvl} — ${lvl.name.toUpperCase()}!`;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+/* ══ PICK ══ */
+function pick(side){
+  if(flipping||!gameActive)return;
+  chosen=chosen===side?null:side;
+  document.getElementById('ph').className='pick'+(chosen==='h'?' sel-h':'');
+  document.getElementById('pt').className='pick'+(chosen==='t'?' sel-t':'');
+  document.getElementById('taunt').className='taunt';
+  document.getElementById('taunt').textContent=chosen?'now flip it 🪙 (SPACE)':'pick a side bestie 👆';
 }
 
-/* ══════════════════════════════════════════
-   FLIP
-══════════════════════════════════════════ */
-const coinEl    = document.getElementById('coin');
-const stageEl   = document.getElementById('coinStage');
-const flipBtnEl = document.getElementById('flipBtn');
-const resultEl  = document.getElementById('resultText');
-const xpGainEl  = document.getElementById('xpGain');
-const tauntEl   = document.getElementById('tauntEl');
-const multEl    = document.getElementById('multiplierEl');
+/* ══ FLIP ══ */
+function doFlip(){
+  if(flipping||!gameActive)return;
+  if(!chosen){
+    document.getElementById('taunt').textContent=
+      TAUNT_NODANGER[Math.floor(Math.random()*TAUNT_NODANGER.length)];
+    document.getElementById('taunt').className='taunt l';
+    return;
+  }
+  flipping=true;
+  document.getElementById('ph').disabled=true;
+  document.getElementById('pt').disabled=true;
+  document.getElementById('result-txt').classList.remove('show');
 
-function doFlip() {
-  if (isFlipping) return;
-  isFlipping = true;
-  flipBtnEl.disabled = true;
-  document.getElementById('pickHeads').disabled = true;
-  document.getElementById('pickTails').disabled = true;
+  const isH=Math.random()<0.5;
+  const correct=(chosen==='h')===isH;
+  sWhoosh();
 
-  resultEl.classList.remove('visible','heads','tails');
-  stageEl.classList.remove('glow-heads','glow-tails');
-  tauntEl.classList.remove('visible','win','lose');
-  xpGainEl.classList.remove('pop');
+  // speed up as streak grows
+  spinDur=Math.max(0.5,1.2-streak*0.04);
+  const coin=document.getElementById('coin');
+  coin.style.setProperty('--spin-dur',spinDur+'s');
+  coin.classList.remove('land-h','land-t','spinning','wobble');
+  void coin.offsetWidth;
+  coin.classList.add('spinning');
 
-  const isHeads = Math.random() < 0.5;
-  playWhoosh();
+  // BG pulse color
+  document.getElementById('bgpulse').style.background=
+    isH?'radial-gradient(ellipse at 50% 60%,rgba(249,217,107,0.1) 0%,transparent 70%)'
+       :'radial-gradient(ellipse at 50% 60%,rgba(160,168,184,0.1) 0%,transparent 70%)';
 
-  coinEl.classList.remove('land-heads','land-tails','spinning','showing-heads','showing-tails');
-  void coinEl.offsetWidth;
-  coinEl.classList.add('spinning');
+  setTimeout(()=>{
+    coin.classList.remove('spinning');
+    void coin.offsetWidth;
+    coin.classList.add(isH?'land-h':'land-t');
+    if(streak>=5)coin.classList.add('wobble');
 
-  setTimeout(() => {
-    coinEl.classList.remove('spinning');
-    void coinEl.offsetWidth;
-    coinEl.classList.add(isHeads ? 'land-heads' : 'land-tails');
-    coinEl.classList.add(isHeads ? 'showing-heads' : 'showing-tails');
+    const stage=document.getElementById('coin-stage');
+    stage.classList.remove('gh','gt');
+    stage.classList.add(isH?'gh':'gt');
 
-    playClink(isHeads);
-    stageEl.classList.add(isHeads ? 'glow-heads' : 'glow-tails');
+    sClink(isH);
 
-    resultEl.textContent = isHeads ? 'HEADS' : 'TAILS';
-    resultEl.className = 'result-text ' + (isHeads ? 'heads' : 'tails');
-    setTimeout(() => resultEl.classList.add('visible'), 20);
+    const rt=document.getElementById('result-txt');
+    rt.textContent=isH?'HEADS':'TAILS';
+    rt.className='result-txt show '+(isH?'heads':'tails');
 
-    // Scoring
-    const hasPrediction = prediction !== null;
-    const correct = hasPrediction && (prediction === (isHeads ? 'heads' : 'tails'));
+    totalFlips++;
 
-    let xpEarned = 10; // base for flipping
-    let tauntMsg = '';
-    let tauntClass = '';
+    if(correct){
+      totalCorrect++;
+      streak++;
+      if(streak>sessionBest)sessionBest=streak;
+      if(streak>allTimeBest){allTimeBest=streak;saveBest();}
 
-    if (hasPrediction) {
-      if (correct) {
-        state.correctStreak++;
-        const multiplier = Math.min(state.correctStreak, 5);
-        xpEarned = 20 * multiplier;
-        playSuccess();
-        burst(isHeads);
-        tauntMsg = TAUNTS_WIN[Math.floor(Math.random()*TAUNTS_WIN.length)];
-        tauntClass = 'win';
-      } else {
-        state.correctStreak = 0;
-        playFail();
-        document.body.classList.remove('shake');
-        void document.body.offsetWidth;
-        document.body.classList.add('shake');
-        tauntMsg = TAUNTS_LOSE[Math.floor(Math.random()*TAUNTS_LOSE.length)];
-        tauntClass = 'lose';
+      document.getElementById('streak-display').textContent=streak;
+      document.getElementById('streak-display').classList.remove('pop');
+      void document.getElementById('streak-display').offsetWidth;
+      document.getElementById('streak-display').classList.add('pop');
+      document.getElementById('best-num').textContent=sessionBest;
+
+      const taunt=TAUNT_WIN[Math.floor(Math.random()*TAUNT_WIN.length)];
+      document.getElementById('taunt').textContent=taunt;
+      document.getElementById('taunt').className='taunt w';
+
+      sWin();
+      flash('rgba(0,255,136,0.15)');
+      spawnFloats(FLOAT_WIN, streak>=10?4:2);
+      burst(true); tickCC();
+      randomChat('hype');
+
+      // milestones
+      if([5,10,15,20,30,50].includes(streak)){
+        sMilestone();
+        const msg=streak>=30?'LEGENDARY 🏆':streak>=20?'UNSTOPPABLE 🔥':streak>=10?'YOU\'RE ON FIRE 🔥':'STREAK x'+streak+'!';
+        document.getElementById('taunt').textContent=msg;
+        if(streak>=10)spawnFloats(FLOAT_WIN,5);
+        // chat goes crazy
+        setTimeout(()=>addChat(DANGER_TAUNTS[Math.floor(Math.random()*DANGER_TAUNTS.length)],'hype'),400);
       }
+
+      updateDanger();
+      resetPick();
+      flipping=false;
+      document.getElementById('ph').disabled=false;
+      document.getElementById('pt').disabled=false;
+
     } else {
-      burst(isHeads);
-      tauntMsg = TAUNTS_NOPICK[Math.floor(Math.random()*TAUNTS_NOPICK.length)];
+      // GAME OVER
+      sLose();
+      flash('rgba(255,51,85,0.3)',200);
+      document.body.classList.remove('shake');
+      void document.body.offsetWidth;
+      document.body.classList.add('shake');
+      spawnFloats(FLOAT_LOSE,4);
+      burst(false); tickCC();
+      randomChat('roast');
+
+      const taunt=TAUNT_LOSE[Math.floor(Math.random()*TAUNT_LOSE.length)];
+      document.getElementById('taunt').textContent=taunt;
+      document.getElementById('taunt').className='taunt l';
+
+      setTimeout(()=>showGameOver(),800);
     }
 
-    // XP popup
-    xpGainEl.textContent = '+' + xpEarned + ' XP';
-    void xpGainEl.offsetWidth;
-    xpGainEl.classList.add('pop');
-
-    // Taunt
-    setTimeout(() => {
-      tauntEl.textContent = tauntMsg;
-      tauntEl.className = 'taunt visible ' + tauntClass;
-    }, 200);
-
-    updateState(isHeads, correct, hasPrediction, xpEarned);
-    awardXP(xpEarned);
-
-    // Update multiplier display
-    if (state.correctStreak >= 2) {
-      const m = Math.min(state.correctStreak, 5);
-      multEl.textContent = `🔥 ${m}× XP STREAK MULTIPLIER`;
-      multEl.classList.add('visible');
-    } else {
-      multEl.classList.remove('visible');
-    }
-
-    // Reset prediction
-    prediction = null;
-    document.getElementById('pickHeads').className = 'predict-btn';
-    document.getElementById('pickTails').className = 'predict-btn';
-
-    isFlipping = false;
-    flipBtnEl.disabled = false;
-    document.getElementById('pickHeads').disabled = false;
-    document.getElementById('pickTails').disabled = false;
-  }, 1500);
+  }, spinDur*1000);
 }
 
-function updateState(isHeads, correct, hasPrediction, xpEarned) {
-  const type = isHeads ? 'heads' : 'tails';
-  state.total++;
-  state[type]++;
-  if (hasPrediction && correct) state.correct++;
+/* ══ GAME OVER ══ */
+function showGameOver(){
+  gameActive=false;
+  const go=document.getElementById('gameover');
+  go.classList.add('show');
 
-  state.history.unshift({
-    result: type,
-    prediction: prediction, // already reset after this, capture before
-    correct: hasPrediction ? correct : null,
-  });
-  // re-capture since prediction resets after
-  state.history[0].prediction = hasPrediction ? (isHeads ? (correct ? type : (type==='heads'?'tails':'heads')) : null) : null;
-  if (state.history.length > 30) state.history.pop();
+  document.getElementById('go-score-num').textContent=streak;
 
-  if (state.currentStreakType === type) {
-    state.currentStreak++;
-  } else {
-    state.currentStreakType = type;
-    state.currentStreak = 1;
+  // roast based on streak
+  let roast='you got cooked. simple as that. 😭';
+  for(const [thresh,msg] of GO_ROASTS){
+    if(streak<=parseInt(thresh)||thresh==='∞'){roast=msg;break;}
   }
-  if (state.currentStreak > state.longestStreak) state.longestStreak = state.currentStreak;
+  document.getElementById('go-roast').textContent=roast;
 
-  saveState();
-  renderUI(type);
+  const isNewBest=streak>=allTimeBest&&streak>0;
+  document.getElementById('go-best').textContent=
+    isNewBest?'🏆 NEW ALL-TIME BEST!!':`all-time best: ${allTimeBest}`;
+
+  document.getElementById('go-total').textContent=totalFlips;
+  document.getElementById('go-acc').textContent=
+    totalFlips>0?Math.round(totalCorrect/totalFlips*100)+'%':'—';
+  document.getElementById('go-alltime').textContent=allTimeBest;
+
+  const shareTexts=[
+    `i just got a ${streak} streak on flipacoin and then got cooked 💀`,
+    `${streak} correct in a row before the coin destroyed me 😭`,
+    `the coin said ${streak} and no more 🪙`,
+  ];
+  document.getElementById('go-share').textContent=
+    shareTexts[Math.floor(Math.random()*shareTexts.length)];
 }
 
-/* ══════════════════════════════════════════
-   RENDER
-══════════════════════════════════════════ */
-function renderUI(lastType) {
-  const { heads, tails, total, correct, history, currentStreak, currentStreakType, longestStreak } = state;
-
-  setAndPop('headsCount', heads, lastType === 'heads');
-  setAndPop('tailsCount', tails, lastType === 'tails');
-  setAndPop('totalCount', total, true);
-
-  const acc = total > 0 ? (correct / total * 100).toFixed(1) + '%' : '—';
-  document.getElementById('accuracyVal').textContent = acc;
-
-  const sIcon = currentStreakType === 'heads' ? '👑' : currentStreakType === 'tails' ? '🦅' : '';
-  document.getElementById('streakVal').textContent = total > 0 ? `${currentStreak}× ${sIcon}` : '—';
-  document.getElementById('longestStreak').textContent = longestStreak > 0 ? `${longestStreak}×` : '—';
-
-  const pct = total > 0 ? (heads / total * 100) : 50;
-  document.getElementById('barFill').style.width = pct + '%';
-
-  document.getElementById('cardHeads').className = 'stat-card' + (lastType === 'heads' ? ' hl-h' : '');
-  document.getElementById('cardTails').className = 'stat-card' + (lastType === 'tails' ? ' hl-t' : '');
-
-  // History
-  const pCon = document.getElementById('historyPills');
-  pCon.innerHTML = '';
-  if (!history.length) { pCon.innerHTML = '<span class="history-empty">No flips yet</span>'; return; }
-  history.forEach(h => {
-    const p = document.createElement('div');
-    p.className = 'pill ' + h.result + (h.correct === true ? ' correct' : h.correct === false ? ' wrong' : '');
-    const skin = SKINS.find(s => s.id === state.activeSkin);
-    p.textContent = h.result === 'heads' ? skin.headsEmoji : skin.tailsEmoji;
-    p.title = h.result + (h.correct !== null ? (h.correct ? ' ✓' : ' ✗') : '');
-    pCon.appendChild(p);
-  });
+/* ══ START / RESTART ══ */
+function startGame(){
+  document.getElementById('startscreen').style.display='none';
+  gameActive=true;
+  startChat();
+  startViews();
+  addChat('chat finally popped off','hype');
+  addChat('let\'s go!!!','hype');
 }
 
-function renderXP() {
-  const { cur, next } = getLevelInfo(state.totalXp);
-  document.getElementById('levelBadge').textContent = `LEVEL ${cur.lvl} — ${cur.name.toUpperCase()}`;
-  if (next) {
-    const span = state.totalXp - cur.xp;
-    const range = next.xp - cur.xp;
-    const pct = Math.min(100, (span / range) * 100);
-    document.getElementById('xpFill').style.width = pct + '%';
-    document.getElementById('xpLabel').textContent = `${state.totalXp} / ${next.xp} XP`;
-  } else {
-    document.getElementById('xpFill').style.width = '100%';
-    document.getElementById('xpLabel').textContent = `${state.totalXp} XP — MAX LEVEL`;
-  }
+function restartGame(){
+  streak=0;
+  flipping=false;
+  chosen=null;
+  gameActive=true;
+  document.getElementById('gameover').classList.remove('show');
+  document.getElementById('streak-display').textContent='0';
+  document.getElementById('result-txt').className='result-txt';
+  document.getElementById('taunt').textContent='pick a side and flip it 👆';
+  document.getElementById('taunt').className='taunt';
+  document.getElementById('danger').classList.remove('show');
+  document.getElementById('coin-stage').classList.remove('gh','gt');
+  document.getElementById('bgpulse').style.background='';
+  const coin=document.getElementById('coin');
+  coin.classList.remove('wobble','spinning','land-t');
+  coin.classList.add('land-h');
+  resetPick();
+  addChat('they\'re back 😱','hype');
 }
 
-function renderSkins() {
-  const row = document.getElementById('skinsRow');
-  row.innerHTML = '';
-  SKINS.forEach(skin => {
-    const unlocked = state.totalXp >= skin.xpRequired;
-    const active = state.activeSkin === skin.id;
-    const btn = document.createElement('button');
-    btn.className = 'skin-btn' + (active ? ' active' : '') + (!unlocked ? ' locked' : '');
-    btn.innerHTML = `
-      <span class="skin-icon">${skin.icon}</span>
-      ${skin.label}
-      ${unlocked ? '' : `<span class="lock-badge">🔒</span><span class="unlock-xp">${skin.xpRequired} XP</span>`}
-    `;
-    if (unlocked && !active) {
-      btn.addEventListener('click', () => {
-        state.activeSkin = skin.id;
-        document.body.className = 'skin-' + skin.id;
-        // Update coin emojis
-        document.getElementById('headsFace').textContent = skin.headsEmoji;
-        document.getElementById('tailsFace').textContent = skin.tailsEmoji;
-        saveState();
-        renderSkins();
-      });
-    }
-    row.appendChild(btn);
-  });
+function resetPick(){
+  chosen=null;
+  document.getElementById('ph').className='pick';
+  document.getElementById('pt').className='pick';
 }
 
-function setAndPop(id, val, doPop) {
-  const el = document.getElementById(id);
-  el.textContent = val;
-  if (doPop) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
-}
-
-/* ══════════════════════════════════════════
-   PERSISTENCE
-══════════════════════════════════════════ */
-function saveState() {
-  try { localStorage.setItem('flipacoin_v2', JSON.stringify(state)); } catch(e) {}
-}
-function loadState() {
-  try { return JSON.parse(localStorage.getItem('flipacoin_v2')); } catch(e) { return null; }
-}
-
-/* ══════════════════════════════════════════
-   RESET
-══════════════════════════════════════════ */
-document.getElementById('resetBtn').addEventListener('click', () => {
-  if (!confirm('Reset ALL progress including XP and skins? This cannot be undone.')) return;
-  state = freshState();
-  saveState();
-  prediction = null;
-  coinEl.className = 'coin showing-heads';
-  stageEl.className = 'coin-stage';
-  resultEl.className = 'result-text';
-  tauntEl.className = 'taunt';
-  multEl.classList.remove('visible');
-  document.getElementById('pickHeads').className = 'predict-btn';
-  document.getElementById('pickTails').className = 'predict-btn';
-  document.getElementById('barFill').style.width = '50%';
-  document.body.className = 'skin-classic';
-  document.getElementById('headsFace').textContent = '👑';
-  document.getElementById('tailsFace').textContent = '🦅';
-  renderUI(null); renderXP(); renderSkins();
-});
-
-/* ══════════════════════════════════════════
-   SOUND
-══════════════════════════════════════════ */
-document.getElementById('soundBtn').addEventListener('click', () => {
-  soundOn = !soundOn;
-  document.getElementById('soundBtn').textContent = soundOn ? '🔊' : '🔇';
-});
-
-/* ══════════════════════════════════════════
-   STARS
-══════════════════════════════════════════ */
-const starsEl = document.getElementById('stars');
-for (let i = 0; i < 90; i++) {
-  const s = document.createElement('div');
-  s.className = 'star';
-  const sz = Math.random()*2+1;
-  s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${(Math.random()*3+2).toFixed(1)}s;--delay:-${(Math.random()*5).toFixed(1)}s;`;
+/* ══ STARS ══ */
+const starsEl=document.getElementById('stars');
+for(let i=0;i<80;i++){
+  const s=document.createElement('div');s.className='star';
+  const sz=Math.random()*2+0.5;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+2).toFixed(1)}s;--dl:-${(Math.random()*4).toFixed(1)}s;`;
   starsEl.appendChild(s);
 }
 
-/* ══════════════════════════════════════════
-   KEYBOARD
-══════════════════════════════════════════ */
-document.addEventListener('keydown', e => {
-  if (isFlipping) return;
-  if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); doFlip(); }
-  if (e.code === 'KeyH') pickSide('heads');
-  if (e.code === 'KeyT') pickSide('tails');
+/* ══ KEYBOARD ══ */
+document.addEventListener('keydown',e=>{
+  if(!gameActive)return;
+  if(e.code==='KeyH')pick('h');
+  if(e.code==='KeyT')pick('t');
+  if(e.code==='Space'){e.preventDefault();doFlip();}
 });
 
-/* ══════════════════════════════════════════
-   INIT
-══════════════════════════════════════════ */
-document.getElementById('flipBtn').addEventListener('click', doFlip);
-
-// Restore skin
-document.body.className = 'skin-' + (state.activeSkin || 'classic');
-const activeSkin = SKINS.find(s => s.id === state.activeSkin) || SKINS[0];
-document.getElementById('headsFace').textContent = activeSkin.headsEmoji;
-document.getElementById('tailsFace').textContent = activeSkin.tailsEmoji;
-
-renderUI(null);
-renderXP();
-renderSkins();
+/* ══ SOUND TOGGLE ══ */
+document.getElementById('snd').addEventListener('click',()=>{
+  soundOn=!soundOn;
+  document.getElementById('snd').textContent=soundOn?'🔊':'🔇';
+});
 </script>
 </body>
 </html>

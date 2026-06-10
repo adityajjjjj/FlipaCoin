@@ -208,6 +208,100 @@ body{background:var(--bg);color:var(--txt);font-family:'Space Grotesk',sans-seri
 body.shk{animation:shk .45s ease;}
 
 @media(max-width:360px){#coin-stage,#coin{width:145px;height:145px;}.cf{font-size:3.6rem;}#chat{width:100px;}}
+
+/* ══════════ AUTH SCREEN ══════════ */
+#auth-screen{
+  position:fixed;inset:0;z-index:300;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px 22px;gap:0;
+  animation:authIn .5s ease;
+}
+@keyframes authIn{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+#auth-screen.hide{animation:authOut .4s ease forwards;}
+@keyframes authOut{to{opacity:0;transform:scale(.95);pointer-events:none;}}
+
+/* logo area */
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;letter-spacing:.06em;background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px;}
+.auth-tagline{font-size:.7rem;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:28px;}
+
+/* card */
+.auth-card{width:100%;max-width:340px;background:var(--surf);border:1px solid var(--border);border-radius:22px;overflow:hidden;}
+
+/* tabs */
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);}
+.auth-tab{flex:1;padding:14px;font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:700;background:none;border:none;color:var(--muted);cursor:pointer;letter-spacing:.04em;transition:color .2s,background .2s;}
+.auth-tab.active{color:var(--txt);background:var(--surf2);}
+
+/* form body */
+.auth-form-wrap{padding:22px 20px;display:flex;flex-direction:column;gap:14px;}
+
+.auth-field{display:flex;flex-direction:column;gap:5px;}
+.auth-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.auth-input{
+  background:var(--surf2);border:1.5px solid var(--border);border-radius:10px;
+  padding:11px 14px;color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.95rem;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.auth-input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(124,107,255,.18);}
+.auth-input::placeholder{color:var(--muted);}
+.auth-input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,34,68,.15);}
+
+/* error msg */
+.auth-error{font-size:.72rem;color:var(--red);min-height:16px;text-align:center;font-style:italic;}
+
+/* submit btn */
+.auth-submit{
+  background:linear-gradient(135deg,var(--acc),var(--pink));
+  color:#fff;border:none;border-radius:50px;
+  padding:14px;width:100%;
+  font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:800;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  box-shadow:0 6px 24px rgba(124,107,255,.45);
+  letter-spacing:.03em;
+}
+.auth-submit:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(124,107,255,.55);}
+.auth-submit:active{transform:scale(.97);}
+
+/* divider */
+.auth-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.7rem;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* social-style dummy btns */
+.auth-social{display:flex;gap:8px;}
+.auth-social-btn{
+  flex:1;padding:10px 6px;border-radius:10px;border:1.5px solid var(--border);
+  background:var(--surf2);color:var(--txt);font-family:'Space Grotesk',sans-serif;
+  font-size:.78rem;font-weight:700;cursor:pointer;transition:border-color .2s,background .2s;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.auth-social-btn:hover{border-color:var(--acc);background:rgba(124,107,255,.08);}
+
+/* footer link */
+.auth-footer{font-size:.7rem;color:var(--muted);text-align:center;margin-top:14px;}
+.auth-footer b{color:var(--acc);cursor:pointer;font-weight:700;}
+.auth-footer b:hover{text-decoration:underline;}
+
+/* welcome toast */
+#welcome-toast{
+  position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-16px);
+  background:linear-gradient(135deg,var(--acc),var(--pink));
+  color:#fff;border-radius:50px;padding:10px 24px;
+  font-family:'Space Mono',monospace;font-size:.8rem;font-weight:700;letter-spacing:.06em;
+  opacity:0;pointer-events:none;z-index:400;white-space:nowrap;
+  box-shadow:0 8px 28px rgba(124,107,255,.55);transition:opacity .3s,transform .3s;
+}
+#welcome-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* username chip in topbar */
+#user-chip{
+  font-size:.68rem;font-weight:700;color:var(--acc);
+  background:rgba(124,107,255,.12);border:1px solid rgba(124,107,255,.3);
+  border-radius:20px;padding:3px 9px;cursor:pointer;
+  font-family:'Space Mono',monospace;letter-spacing:.04em;
+  display:none;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;
+}
 </style>
 </head>
 <body>
@@ -217,9 +311,76 @@ body.shk{animation:shk .45s ease;}
 <div id="flash"></div>
 <button id="snd">🔊</button>
 <div id="chat"><div id="chat-inner"></div></div>
+<div id="welcome-toast"></div>
+
+<!-- ══ AUTH SCREEN ══ -->
+<div id="auth-screen">
+  <div class="auth-logo">FlipaCoin</div>
+  <div class="auth-tagline">sign in to flip. or don't. (you do.)</div>
+
+  <div class="auth-card">
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Log In</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="auth-form-wrap" id="form-login">
+      <div class="auth-field">
+        <div class="auth-label">Username</div>
+        <input class="auth-input" id="li-user" type="text" placeholder="your username" autocomplete="username" maxlength="20"/>
+      </div>
+      <div class="auth-field">
+        <div class="auth-label">Password</div>
+        <input class="auth-input" id="li-pass" type="password" placeholder="your password" autocomplete="current-password"/>
+      </div>
+      <div class="auth-error" id="li-err"></div>
+      <button class="auth-submit" onclick="doLogin()">Log In 🪙</button>
+      <div class="auth-divider">or</div>
+      <div class="auth-social">
+        <button class="auth-social-btn" onclick="dummySocial('Google')">🌐 Google</button>
+        <button class="auth-social-btn" onclick="dummySocial('Discord')">🎮 Discord</button>
+        <button class="auth-social-btn" onclick="dummySocial('X')">𝕏 / Twitter</button>
+      </div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div class="auth-form-wrap" id="form-signup" style="display:none;">
+      <div class="auth-field">
+        <div class="auth-label">Username</div>
+        <input class="auth-input" id="su-user" type="text" placeholder="pick something cool" autocomplete="username" maxlength="20"/>
+      </div>
+      <div class="auth-field">
+        <div class="auth-label">Email</div>
+        <input class="auth-input" id="su-email" type="email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="auth-field">
+        <div class="auth-label">Password</div>
+        <input class="auth-input" id="su-pass" type="password" placeholder="min 6 chars" autocomplete="new-password"/>
+      </div>
+      <div class="auth-field">
+        <div class="auth-label">Confirm Password</div>
+        <input class="auth-input" id="su-pass2" type="password" placeholder="same thing again" autocomplete="new-password"/>
+      </div>
+      <div class="auth-error" id="su-err"></div>
+      <button class="auth-submit" onclick="doSignup()">Create Account 🚀</button>
+      <div class="auth-divider">or</div>
+      <div class="auth-social">
+        <button class="auth-social-btn" onclick="dummySocial('Google')">🌐 Google</button>
+        <button class="auth-social-btn" onclick="dummySocial('Discord')">🎮 Discord</button>
+        <button class="auth-social-btn" onclick="dummySocial('X')">𝕏 / Twitter</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-footer" id="auth-switch-hint">
+    no account? <b onclick="switchTab('signup')">sign up — it's free</b>
+  </div>
+</div>
 
 <!-- START -->
-<div class="screen show" id="start-screen">
+<div class="screen" id="start-screen">
   <div id="ss-coin">🪙</div>
   <div id="ss-title">FlipaCoin</div>
   <div id="ss-sub">it's giving skill. it's not.</div>
@@ -273,7 +434,10 @@ body.shk{animation:shk .45s ease;}
   <div id="topbar">
     <div id="logo">FlipaCoin</div>
     <div id="live-pill"><div id="live-dot"></div>LIVE</div>
-    <div id="view-wrap">👁 <span id="views">4,206</span></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="user-chip" onclick="doLogout()" title="click to log out"></div>
+      <div id="view-wrap">👁 <span id="views">4,206</span></div>
+    </div>
   </div>
 
   <!-- Score -->
@@ -796,8 +960,157 @@ document.addEventListener('keydown',e=>{
 /* ── SOUND ── */
 document.getElementById('snd').addEventListener('click',()=>{soundOn=!soundOn;document.getElementById('snd').textContent=soundOn?'🔊':'🔇';});
 
-/* ── FIX TypeScript-ism that snuck in ── */
-// TMILESTONE is a plain object, not TS Record
+/* ══════════════════════════════════════════
+   AUTH SYSTEM (dummy — localStorage only)
+══════════════════════════════════════════ */
+
+// "database" of users stored in localStorage as JSON
+function getUsers(){try{return JSON.parse(localStorage.getItem('fca_users'))||{};}catch(e){return {};}}
+function saveUsers(u){try{localStorage.setItem('fca_users',JSON.stringify(u));}catch(e){}}
+function getSession(){try{return localStorage.getItem('fca_session')||null;}catch(e){return null;}}
+function saveSession(u){try{localStorage.setItem('fca_session',u);}catch(e){}}
+function clearSession(){try{localStorage.removeItem('fca_session');}catch(e){}}
+
+let currentUser=null;
+
+function switchTab(tab){
+  const isLogin=tab==='login';
+  document.getElementById('tab-login').className='auth-tab'+(isLogin?' active':'');
+  document.getElementById('tab-signup').className='auth-tab'+(!isLogin?' active':'');
+  document.getElementById('form-login').style.display=isLogin?'flex':'none';
+  document.getElementById('form-signup').style.display=isLogin?'none':'flex';
+  document.getElementById('auth-switch-hint').innerHTML=isLogin
+    ?'no account? <b onclick="switchTab(\'signup\')">sign up — it\'s free</b>'
+    :'already have one? <b onclick="switchTab(\'login\')">log in</b>';
+  document.getElementById('li-err').textContent='';
+  document.getElementById('su-err').textContent='';
+}
+
+function setErr(id,msg){
+  document.getElementById(id).textContent=msg;
+}
+function clearInputErr(ids){
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.remove('err');
+  });
+}
+function markErr(id){
+  const el=document.getElementById(id);
+  if(el){el.classList.add('err');el.focus();}
+}
+
+function doLogin(){
+  const user=document.getElementById('li-user').value.trim();
+  const pass=document.getElementById('li-pass').value;
+  clearInputErr(['li-user','li-pass']);
+  setErr('li-err','');
+
+  if(!user){markErr('li-user');setErr('li-err','username can\'t be empty bestie 😭');return;}
+  if(!pass){markErr('li-pass');setErr('li-err','password?? hello?? 👀');return;}
+
+  const users=getUsers();
+  if(!users[user]){markErr('li-user');setErr('li-err','who are you?? account not found 💀');return;}
+  if(users[user].password!==btoa(pass)){markErr('li-pass');setErr('li-err','wrong password. cooked. 🫠');return;}
+
+  loginSuccess(user);
+}
+
+function doSignup(){
+  const user=document.getElementById('su-user').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pass=document.getElementById('su-pass').value;
+  const pass2=document.getElementById('su-pass2').value;
+  clearInputErr(['su-user','su-email','su-pass','su-pass2']);
+  setErr('su-err','');
+
+  if(!user){markErr('su-user');setErr('su-err','pick a username bestie 😭');return;}
+  if(user.length<3){markErr('su-user');setErr('su-err','username too short — min 3 chars');return;}
+  if(!/^[a-zA-Z0-9_]+$/.test(user)){markErr('su-user');setErr('su-err','letters, numbers, underscores only fr');return;}
+  if(!email||!email.includes('@')){markErr('su-email');setErr('su-err','that\'s not an email bro 💀');return;}
+  if(pass.length<6){markErr('su-pass');setErr('su-err','password too short — min 6 chars');return;}
+  if(pass!==pass2){markErr('su-pass2');setErr('su-err','passwords don\'t match 🫠');return;}
+
+  const users=getUsers();
+  if(users[user]){markErr('su-user');setErr('su-err','username taken. be more creative 💅');return;}
+
+  users[user]={password:btoa(pass),email,joined:Date.now()};
+  saveUsers(users);
+  loginSuccess(user,true);
+}
+
+function dummySocial(provider){
+  // fake loading then auto-create guest account
+  const btn=event.target.closest('.auth-social-btn');
+  const orig=btn.textContent;
+  btn.textContent='connecting...';btn.disabled=true;
+  setTimeout(()=>{
+    btn.textContent=orig;btn.disabled=false;
+    const guestName=provider.toLowerCase()+'_user_'+Math.floor(Math.random()*9000+1000);
+    const users=getUsers();
+    users[guestName]={password:btoa('oauth_'+provider),email:'',joined:Date.now(),social:provider};
+    saveUsers(users);
+    loginSuccess(guestName,true);
+  },1200);
+}
+
+function loginSuccess(user,isNew=false){
+  currentUser=user;
+  saveSession(user);
+
+  // show welcome toast
+  const toast=document.getElementById('welcome-toast');
+  toast.textContent=isNew?`welcome to the coin, @${user} 🪙`:`welcome back, @${user} 👑`;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),3000);
+
+  // show user chip in topbar
+  const chip=document.getElementById('user-chip');
+  chip.textContent='@'+user;
+  chip.style.display='block';
+  chip.title='logged in as @'+user+' · click to log out';
+
+  // hide auth screen
+  const auth=document.getElementById('auth-screen');
+  auth.classList.add('hide');
+  setTimeout(()=>auth.style.display='none',420);
+
+  // show start screen
+  document.getElementById('start-screen').classList.add('show');
+
+  // personalise chat with their username
+  setTimeout(()=>addChat(`@${user} just dropped in 👀`,'n'),800);
+  setTimeout(()=>addChat('welcome to the coin 🪙','h'),1600);
+}
+
+function doLogout(){
+  if(!confirm('log out? your all-time best is saved 🫡'))return;
+  clearSession();
+  currentUser=null;
+  document.getElementById('user-chip').style.display='none';
+  document.getElementById('start-screen').classList.remove('show');
+  gameActive=false;
+  // reset & show auth
+  const auth=document.getElementById('auth-screen');
+  auth.style.display='flex';
+  auth.classList.remove('hide');
+  // clear inputs
+  ['li-user','li-pass','su-user','su-email','su-pass','su-pass2'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  setErr('li-err','');setErr('su-err','');
+}
+
+/* ── AUTO LOGIN if session exists ── */
+(function checkSession(){
+  const s=getSession();
+  const users=getUsers();
+  if(s&&users[s]){
+    // session valid — skip auth straight to start screen
+    loginSuccess(s,false);
+  }
+  // else auth screen already visible
+})();
 </script>
 </body>
 </html>
